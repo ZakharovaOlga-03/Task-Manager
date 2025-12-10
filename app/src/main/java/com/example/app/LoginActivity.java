@@ -24,13 +24,13 @@ public class LoginActivity extends AppCompatActivity {
 
         Log.d(TAG, "LoginActivity started");
 
-        // Проверить, не авторизован ли уже пользователь
         authManager = new AuthManager(this);
-        if (authManager.isLoggedIn()) {
-            Log.d(TAG, "User already logged in, redirecting to MainActivity");
-            startMainActivity();
-            return;
-        }
+        // Проверить, не авторизован ли уже пользователь
+        //if (authManager.isLoggedIn()) {
+        //    Log.d(TAG, "User already logged in, redirecting to MainActivity");
+        //    startMainActivity();
+        //    return;
+        //}
 
         initViews();
         setupListeners();

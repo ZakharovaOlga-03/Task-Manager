@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="padding_4">4dp</dimen>
+  <dimen name="padding_8">8dp</dimen>
+  <dimen name="padding_12">12dp</dimen>
+  <dimen name="padding_16">16dp</dimen>
+  <dimen name="padding_20">20dp</dimen>
+  <dimen name="padding_24">24dp</dimen>
+  <dimen name="padding_32">32dp</dimen>
+  <dimen name="padding_36">36dp</dimen>
+  <dimen name="padding_48">48dp</dimen>
+  <dimen name="padding_60">60dp</dimen>
+  <dimen name="text_size_10">10sp</dimen>
+  <dimen name="text_size_11">11sp</dimen>
+  <dimen name="text_size_12">12sp</dimen>
+  <dimen name="text_size_14">14sp</dimen>
+  <dimen name="text_size_16">16sp</dimen>
+  <dimen name="text_size_18">18sp</dimen>
+  <dimen name="text_size_20">20sp</dimen>
+  <dimen name="text_size_24">24sp</dimen>
+  <dimen name="text_size_26">26sp</dimen>
+  <dimen name="text_size_28">28sp</dimen>
+  <dimen name="text_size_32">32sp</dimen>
+  <dimen name="text_size_48">48sp</dimen>
+  <dimen name="text_size_72">72sp</dimen>
+  <dimen name="text_size_96">96sp</dimen>
+  <dimen name="icon_16">16dp</dimen>
+  <dimen name="icon_20">20dp</dimen>
+  <dimen name="icon_24">24dp</dimen>
+  <dimen name="icon_28">28dp</dimen>
+  <dimen name="icon_32">32dp</dimen>
+  <dimen name="icon_40">40dp</dimen>
+  <dimen name="icon_48">48dp</dimen>
+  <dimen name="icon_56">56dp</dimen>
+  <dimen name="icon_64">64dp</dimen>
+  <dimen name="corner_4">10dp</dimen>
+  <dimen name="corner_8">8dp</dimen>
+  <dimen name="corner_12">12dp</dimen>
+  <dimen name="corner_16">16dp</dimen>
+  <dimen name="corner_24">24dp</dimen>
+  <dimen name="corner_28">28dp</dimen>
+  <dimen name="corner_32">32dp</dimen>
+  <dimen name="bottom_nav_height">56dp</dimen>
+  <dimen name="padding_2">2dp</dimen>
+  <dimen name="padding_6">6dp</dimen>
+  <dimen name="text_size_9">9sp</dimen>
+  <dimen name="text_size_13">13sp</dimen>
+  <dimen name="padding_3">3dp</dimen>
+  <dimen name="padding_100">100dp</dimen>
+  <dimen name="padding_80">80dp</dimen>
+
+
+
+
+
+</resources>

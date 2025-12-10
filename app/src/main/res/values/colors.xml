@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="primary_dark">#35234b</color>
+  <color name="primary_light">#4a3d7f</color>
+  <color name="accent_purple">#7d5fa3</color>
+  <color name="light_bg">#e8d5e8</color>
+  <color name="task_bg_dark">#4a3d6f</color>
+  <color name="task_bg_light">#6a5d8f</color>
+  <color name="white_text">#ffffff</color>
+  <color name="light_text">#feffff</color>
+  <color name="green_complete">#4caf50</color>
+  <color name="orange_accent">#ff9800</color>
+  <color name="pink_add_task">#d4a5c5</color>
+  <color name="calendar_selected">#7d5fa3</color>
+  <color name="calendar_today">#a388c3</color>
+  <color name="text_primary">#2c2c2c</color>
+  <color name="text_secondary">#666666</color>
+  <color name="accent_color">#8B5CF6</color>
+  <color name="nav_outer_bg">#3D2651</color>
+  <color name="nav_inner_bg">#4A2F5E</color>
+  <color name="hint_text">#999999</color>
+  <color name="card_background">#fbe5d8</color>
+  <color name="error_color">#F66914</color>
+
+</resources>

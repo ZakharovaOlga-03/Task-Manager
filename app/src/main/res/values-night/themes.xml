@@ -1,0 +1,17 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+  <style name="Base.Theme.TaskManager" parent="Theme.Material3.Dark.NoActionBar">
+    <item name="colorPrimary">@color/primary_dark</item>
+    <item name="colorPrimaryVariant">@color/primary_dark</item>
+    <item name="colorOnPrimary">@color/white_text</item>
+    <item name="colorSecondary">@color/accent_color</item>
+    <item name="colorSecondaryVariant">@color/accent_color</item>
+    <item name="colorOnSecondary">@color/white_text</item>
+    <item name="android:statusBarColor">@android:color/transparent</item>
+    <item name="android:navigationBarColor">@android:color/transparent</item>
+    <item name="android:windowLightStatusBar">false</item>
+    <item name="android:windowLightNavigationBar" tools:targetApi="o_mr1">false</item>
+    <item name="android:enforceNavigationBarContrast" tools:targetApi="q">false</item>
+  </style>
+
+  <style name="Theme.TaskManager" parent="Base.Theme.TaskManager" />
+</resources>

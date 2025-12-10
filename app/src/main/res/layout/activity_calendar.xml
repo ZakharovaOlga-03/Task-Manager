@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary_dark"
+    android:fitsSystemWindows="false">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="@dimen/padding_24"
+        android:paddingHorizontal="@dimen/padding_16"
+        android:background="@color/primary_dark"
+        app:layout_constraintTop_toTopOf="parent">
+
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:gravity="center_vertical"
+          android:paddingBottom="@dimen/padding_16">
+
+        <ImageView
+            android:id="@+id/menu_btn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_menu"
+            android:contentDescription="Menu"
+            android:scaleType="fitXY"
+            app:tint="#FFFFFF" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <!-- Кнопки навигации по месяцам -->
+        <ImageView
+            android:id="@+id/btn_prev_month"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_chevron_left"
+            android:contentDescription="Предыдущий месяц"
+            android:scaleType="fitXY"
+            app:tint="#FFFFFF"
+            android:onClick="goToPreviousMonth"
+            android:layout_marginEnd="8dp" />
+
+        <TextView
+            android:id="@+id/tv_month_year"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Апрель 2025"
+            android:textSize="@dimen/text_size_20"
+            android:textColor="@color/white_text"
+            android:textStyle="bold"
+            android:paddingHorizontal="@dimen/padding_8" />
+
+        <ImageView
+            android:id="@+id/btn_next_month"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_chevron_right"
+            android:contentDescription="Следующий месяц"
+            android:scaleType="fitXY"
+            app:tint="#FFFFFF"
+            android:onClick="goToNextMonth"
+            android:layout_marginStart="8dp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:id="@+id/search_btn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_search"
+            android:contentDescription="Search"
+            android:scaleType="fitXY"
+            app:tint="#FFFFFF" />
+
+      </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/calendar_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/padding_16"
+        android:background="@color/primary_dark"
+        app:layout_constraintTop_toBottomOf="@id/header_layout"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+      <!-- Заголовки дней недели -->
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:weightSum="7"
+          android:paddingBottom="@dimen/padding_8">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Вс"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_12"
+            android:textColor="@color/light_text"
+            android:fontFamily="sans-serif-black" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Пн"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_12"
+            android:textColor="@color/light_text"
+            android:fontFamily="sans-serif-black" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Вт"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_12"
+            android:textColor="@color/accent_color"
+            android:fontFamily="sans-serif-black" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Ср"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_12"
+            android:textColor="@color/light_text"
+            android:fontFamily="sans-serif-black" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Чт"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_12"
+            android:textColor="@color/light_text"
+            android:fontFamily="sans-serif-black" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Пт"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_12"
+            android:textColor="@color/light_text"
+            android:fontFamily="sans-serif-black" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Сб"
+            android:gravity="center"
+            android:textSize="@dimen/text_size_12"
+            android:textColor="@color/light_text"
+            android:fontFamily="sans-serif-black" />
+
+      </LinearLayout>
+
+      <!-- Календарь -->
+      <androidx.recyclerview.widget.RecyclerView
+          android:id="@+id/rv_calendar"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:nestedScrollingEnabled="false" />
+
+      <!-- Кнопка "Сегодня" -->
+      <Button
+          android:id="@+id/btn_today"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center_horizontal"
+          android:layout_marginTop="16dp"
+          android:text="Сегодня"
+          android:textColor="@color/accent_color"
+          android:background="?android:attr/selectableItemBackground"
+          android:paddingHorizontal="24dp"
+          android:paddingVertical="8dp"
+          android:onClick="goToToday" />
+
+    </LinearLayout>
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
+  <LinearLayout
+      android:id="@+id/tasks_panel"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:orientation="vertical"
+      android:layout_marginBottom="56dp"
+      app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
+      app:behavior_peekHeight="200dp"
+      app:behavior_hideable="false">
+
+    <View
+        android:layout_width="60dp"
+        android:layout_height="4dp"
+        android:background="@drawable/indicator_bar"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/padding_8"
+        android:layout_marginBottom="@dimen/padding_8" />
+
+    <LinearLayout
+        android:id="@+id/tasks_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@drawable/card_content_rounded"
+        android:paddingTop="@dimen/padding_20"
+        android:paddingBottom="@dimen/padding_16"
+        android:paddingHorizontal="@dimen/padding_16">
+
+      <TextView
+          android:id="@+id/tv_selected_date"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:text="Вторник, 9 апреля"
+          android:textSize="@dimen/text_size_18"
+          android:textColor="@color/text_primary"
+          android:textStyle="bold"
+          android:layout_marginBottom="@dimen/padding_20" />
+
+      <androidx.recyclerview.widget.RecyclerView
+          android:id="@+id/rv_day_tasks"
+          android:layout_width="match_parent"
+          android:layout_height="0dp"
+          android:layout_weight="1"
+          android:clipToPadding="false"
+          android:paddingBottom="80dp"
+          android:nestedScrollingEnabled="false" />
+
+    </LinearLayout>
+
+  </LinearLayout>
+
+  <include
+      android:id="@+id/bottom_nav_container"
+      layout="@layout/bottom_navigation"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_gravity="bottom"
+      android:elevation="16dp" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

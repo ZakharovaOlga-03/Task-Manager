@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="@color/primary_dark">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Регистрация"
+        android:textSize="32sp"
+        android:textColor="@color/white_text"
+        android:textStyle="bold"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- Имя -->
+    <EditText
+        android:id="@+id/etName"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:hint="Ваше имя (минимум 2 символа)"
+        android:inputType="textPersonName"
+        android:textColor="@color/white_text"
+        android:textColorHint="@color/light_text"
+        android:background="@color/task_bg_dark"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textSize="16sp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Email -->
+    <EditText
+        android:id="@+id/etEmail"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:hint="Email (например: user@example.com)"
+        android:inputType="textEmailAddress"
+        android:textColor="@color/white_text"
+        android:textColorHint="@color/light_text"
+        android:background="@color/task_bg_dark"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textSize="16sp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Пароль -->
+    <EditText
+        android:id="@+id/etPassword"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:hint="Пароль (минимум 6 символов)"
+        android:inputType="textPassword"
+        android:textColor="@color/white_text"
+        android:textColorHint="@color/light_text"
+        android:background="@color/task_bg_dark"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textSize="16sp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Подтверждение пароля -->
+    <EditText
+        android:id="@+id/etConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:hint="Повторите пароль"
+        android:inputType="textPassword"
+        android:textColor="@color/white_text"
+        android:textColorHint="@color/light_text"
+        android:background="@color/task_bg_dark"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textSize="16sp"
+        android:layout_marginBottom="32dp"/>
+
+    <!-- Кнопка регистрации -->
+    <Button
+        android:id="@+id/btnRegister"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Зарегистрироваться"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/white_text"
+        android:background="@color/accent_purple"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:id="@+id/tvLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Уже есть аккаунт? Войти"
+        android:textColor="@color/light_text"
+        android:textSize="14sp"
+        android:padding="8dp"/>
+
+</LinearLayout>

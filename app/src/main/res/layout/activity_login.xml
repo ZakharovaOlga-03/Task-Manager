@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center"
+    android:background="@color/primary_dark">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Task Manager"
+        android:textSize="32sp"
+        android:textColor="@color/white_text"
+        android:textStyle="bold"
+        android:layout_marginBottom="48dp"/>
+
+    <!-- Email поле с подсказкой -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="16dp">
+
+        <EditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:hint="Введите email"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/white_text"
+            android:textColorHint="@color/light_text"
+            android:background="@color/task_bg_dark"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Формат: example@mail.com"
+            android:textColor="@color/light_text"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="4dp"/>
+
+    </LinearLayout>
+
+    <!-- Пароль поле с подсказкой -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginBottom="32dp">
+
+        <EditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:hint="Введите пароль"
+            android:inputType="textPassword"
+            android:textColor="@color/white_text"
+            android:textColorHint="@color/light_text"
+            android:background="@color/task_bg_dark"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:textSize="16sp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Минимум 6 символов"
+            android:textColor="@color/light_text"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="4dp"/>
+
+    </LinearLayout>
+
+    <!-- Кнопка входа -->
+    <Button
+        android:id="@+id/btnLogin"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Войти"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/white_text"
+        android:background="@color/accent_purple"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:id="@+id/tvRegister"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Нет аккаунта? Зарегистрироваться"
+        android:textColor="@color/light_text"
+        android:textSize="14sp"
+        android:padding="8dp"/>
+
+</LinearLayout>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Task Manager</string>
+  <string name="greeting">Здравствуй, мой друг.</string>
+  <string name="today_tasks">Задачи на сегодня:</string>
+  <string name="read_book">Прочитать 1 том книги</string>
+  <string name="drink_coffee">Отдохнуть, выпить кофе</string>
+  <string name="meeting">Созвон с коллегами</string>
+  <string name="mom_time">Поговорить с мамой</string>
+  <string name="start">Начать</string>
+  <string name="add_task">Add Task</string>
+  <string name="task_name">Введите задачу</string>
+  <string name="category">Здоровье</string>
+  <string name="date_label">Дата</string>
+  <string name="date">2024-03-21</string>
+  <string name="start_time">10:00</string>
+  <string name="end_time">17:00</string>
+  <string name="note">Каждый час</string>
+  <string name="create_task">Создать задачу</string>
+  <string name="april_2025">Апрель, 2025</string>
+  <string name="tuesday_9_april">Вторник, 9 апреля</string>
+  <string name="evening_training">Вечерняя тренировка</string>
+  <string name="meeting_friend">Созвониться с подругой</string>
+  <string name="plan_tomorrow">Расписать планы на завтра</string>
+  <string name="name">Название</string>
+  <string name="start_label">Начало</string>
+  <string name="end_label">Конец</string>
+  <string name="reminder">Напоминание</string>
+  <string name="completed">Завершено</string>
+  <string name="in_progress">В процессе</string>
+  <string name="pending">Ожидание</string>
+</resources>

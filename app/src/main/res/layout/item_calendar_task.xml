@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:orientation="vertical"
+  android:background="@drawable/card_task_main"
+  android:padding="@dimen/padding_12"
+  android:layout_marginBottom="@dimen/padding_12">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal">
+
+    <TextView
+      android:id="@+id/tv_time"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:text="18:00 - 19:00"
+      android:textSize="@dimen/text_size_11"
+      android:textColor="@color/light_text"
+      android:textStyle="bold" />
+
+    <TextView
+      android:id="@+id/tv_status"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="текущая"
+      android:textSize="@dimen/text_size_9"
+      android:textColor="@color/white_text"
+      android:background="@drawable/badge_dark_bg"
+      android:paddingHorizontal="@dimen/padding_8"
+      android:paddingVertical="@dimen/padding_3" />
+
+  </LinearLayout>
+
+  <TextView
+    android:id="@+id/tv_title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Вечерняя тренировка"
+    android:textSize="@dimen/text_size_14"
+    android:textColor="@color/white_text"
+    android:textStyle="bold"
+    android:layout_marginTop="@dimen/padding_4" />
+
+</LinearLayout>

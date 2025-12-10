@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary_dark"
+    android:fitsSystemWindows="true">
+
+  <!-- Верхняя панель с календарем -->
+  <LinearLayout
+      android:id="@+id/header_layout"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical"
+      android:paddingTop="@dimen/padding_24"
+      android:paddingHorizontal="@dimen/padding_16"
+      android:background="@color/primary_dark"
+      app:layout_constraintTop_toTopOf="parent">
+
+    <!-- Навигация месяца -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="@dimen/padding_16">
+
+      <ImageView
+          android:id="@+id/btn_calendar_prev"
+          android:layout_width="32dp"
+          android:layout_height="32dp"
+          android:src="@drawable/ic_chevron_left"
+          android:contentDescription="Previous week"
+          android:scaleType="fitXY"
+          app:tint="#FFFFFF" />
+
+      <TextView
+          android:id="@+id/tv_month_year"
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="Апрель, 2025"
+          android:textSize="@dimen/text_size_20"
+          android:textColor="@color/white_text"
+          android:textStyle="bold"
+          android:gravity="center"
+          android:paddingHorizontal="@dimen/padding_8" />
+
+      <ImageView
+          android:id="@+id/btn_calendar_next"
+          android:layout_width="32dp"
+          android:layout_height="32dp"
+          android:src="@drawable/ic_chevron_right"
+          android:contentDescription="Next week"
+          android:scaleType="fitXY"
+          app:tint="#FFFFFF" />
+
+    </LinearLayout>
+
+    <!-- День недели и дата -->
+    <TextView
+        android:id="@+id/tv_day_of_week"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Понедельник, 1 апреля"
+        android:textSize="@dimen/text_size_16"
+        android:textColor="@color/white_text"
+        android:paddingStart="@dimen/padding_4"
+        android:paddingBottom="@dimen/padding_16" />
+
+    <!-- Календарь (7 дней равномерно распределены) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="7"
+        android:paddingBottom="@dimen/padding_16">
+
+      <TextView
+          android:id="@+id/day_mon"
+          android:layout_width="0dp"
+          android:layout_height="55dp"
+          android:layout_weight="1"
+          android:text="ПН\n1"
+          android:gravity="center"
+          android:textSize="@dimen/text_size_12"
+          android:textColor="@color/light_text"
+          android:layout_marginEnd="@dimen/padding_4"
+          android:fontFamily="sans-serif-black"
+          android:background="@drawable/calendar_day_bg"
+          android:onClick="onDayClick"
+          android:tag="0" />
+
+      <TextView
+          android:id="@+id/day_tue"
+          android:layout_width="0dp"
+          android:layout_height="55dp"
+          android:layout_weight="1"
+          android:text="ВТ\n2"
+          android:gravity="center"
+          android:textSize="@dimen/text_size_12"
+          android:textColor="@color/light_text"
+          android:layout_marginEnd="@dimen/padding_4"
+          android:fontFamily="sans-serif-black"
+          android:background="@drawable/calendar_day_bg"
+          android:onClick="onDayClick"
+          android:tag="1" />
+
+      <TextView
+          android:id="@+id/day_wed"
+          android:layout_width="0dp"
+          android:layout_height="55dp"
+          android:layout_weight="1"
+          android:text="СР\n3"
+          android:gravity="center"
+          android:textSize="@dimen/text_size_12"
+          android:textColor="@color/light_text"
+          android:layout_marginEnd="@dimen/padding_4"
+          android:fontFamily="sans-serif-black"
+          android:background="@drawable/calendar_day_bg"
+          android:onClick="onDayClick"
+          android:tag="2" />
+
+      <TextView
+          android:id="@+id/day_thu"
+          android:layout_width="0dp"
+          android:layout_height="55dp"
+          android:layout_weight="1"
+          android:text="ЧТ\n4"
+          android:gravity="center"
+          android:textSize="@dimen/text_size_12"
+          android:textColor="@color/light_text"
+          android:layout_marginEnd="@dimen/padding_4"
+          android:fontFamily="sans-serif-black"
+          android:background="@drawable/calendar_day_bg"
+          android:onClick="onDayClick"
+          android:tag="3" />
+
+      <TextView
+          android:id="@+id/day_fri"
+          android:layout_width="0dp"
+          android:layout_height="55dp"
+          android:layout_weight="1"
+          android:text="ПТ\n5"
+          android:gravity="center"
+          android:textSize="@dimen/text_size_12"
+          android:textColor="@color/light_text"
+          android:layout_marginEnd="@dimen/padding_4"
+          android:fontFamily="sans-serif-black"
+          android:background="@drawable/calendar_day_bg"
+          android:onClick="onDayClick"
+          android:tag="4" />
+
+      <TextView
+          android:id="@+id/day_sat"
+          android:layout_width="0dp"
+          android:layout_height="55dp"
+          android:layout_weight="1"
+          android:text="СБ\n6"
+          android:gravity="center"
+          android:textSize="@dimen/text_size_12"
+          android:textColor="@color/light_text"
+          android:layout_marginEnd="@dimen/padding_4"
+          android:fontFamily="sans-serif-black"
+          android:background="@drawable/calendar_day_bg"
+          android:onClick="onDayClick"
+          android:tag="5" />
+
+      <TextView
+          android:id="@+id/day_sun"
+          android:layout_width="0dp"
+          android:layout_height="55dp"
+          android:layout_weight="1"
+          android:text="ВС\n7"
+          android:gravity="center"
+          android:textSize="@dimen/text_size_12"
+          android:textColor="@color/light_text"
+          android:fontFamily="sans-serif-black"
+          android:background="@drawable/calendar_day_bg"
+          android:onClick="onDayClick"
+          android:tag="6" />
+
+    </LinearLayout>
+
+  </LinearLayout>
+
+  <!-- Контейнер для задач с растягивающимся фоном -->
+  <androidx.core.widget.NestedScrollView
+      android:id="@+id/nested_scroll_view"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:fillViewport="true"
+      android:background="@color/primary_dark"
+      app:layout_constraintTop_toBottomOf="@id/header_layout"
+      app:layout_constraintBottom_toTopOf="@id/bottom_nav">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/primary_dark">
+
+      <!-- Кремовая подложка, которая растягивается на всю высоту -->
+      <View
+          android:layout_width="match_parent"
+          android:layout_height="match_parent"
+          android:background="@drawable/card_content_rounded"
+          android:layout_marginTop="@dimen/padding_16" />
+
+      <!-- Контент поверх подложки -->
+      <LinearLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="vertical"
+          android:paddingTop="@dimen/padding_32"
+          android:paddingBottom="@dimen/padding_32"
+          android:paddingHorizontal="@dimen/padding_16">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Задачи на выбранный день"
+            android:textSize="@dimen/text_size_16"
+            android:textColor="@color/text_primary"
+            android:textStyle="bold"
+            android:layout_marginBottom="@dimen/padding_16" />
+
+        <!-- Список задач -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_tasks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:nestedScrollingEnabled="false"
+            tools:listitem="@layout/item_task" />
+
+        <!-- Сообщение, если нет задач -->
+        <TextView
+            android:id="@+id/tv_no_tasks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Нет задач на этот день"
+            android:textSize="@dimen/text_size_14"
+            android:textColor="@color/text_secondary"
+            android:gravity="center"
+            android:paddingVertical="@dimen/padding_32"
+            android:visibility="gone" />
+
+      </LinearLayout>
+
+    </FrameLayout>
+
+  </androidx.core.widget.NestedScrollView>
+
+  <!-- Нижняя навигация -->
+  <include
+      layout="@layout/bottom_navigation"
+      android:id="@+id/bottom_nav"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

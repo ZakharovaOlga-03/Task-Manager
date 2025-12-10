@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@drawable/background">
+
+  <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="0.6" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="@string/greeting"
+      android:textSize="30sp"
+      android:textColor="@color/white_text"
+      android:gravity="center"
+      android:layout_marginHorizontal="@dimen/padding_16"
+      android:fontFamily="sans-serif-black"
+      android:textStyle="normal" />
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="8dp" />
+
+    <TextView
+      android:id="@+id/splash_time"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="13:45"
+      android:textSize="65sp"
+      android:textColor="@color/white_text"
+      android:gravity="center"
+      android:fontFamily="sans-serif-light"
+      android:textStyle="bold"
+      android:letterSpacing="-0.02" />
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="12dp" />
+
+    <TextView
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:text="Сохраняйте организованность с помощью Трекера, простого в использовании менеджера задач. Планируйте свой день, отслеживайте свои задачи и работайте продуктивно."
+      android:textSize="11sp"
+      android:textColor="#7D7590"
+      android:gravity="center"
+      android:layout_marginHorizontal="@dimen/padding_32"
+      android:lineSpacingMultiplier="1.1"
+      android:fontFamily="sans-serif" />
+
+    <Space
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:layout_weight="1.6" />
+
+    <Button
+      android:id="@+id/start_btn"
+      android:layout_width="200dp"
+      android:layout_height="60dp"
+      android:text="▶ Начать"
+      android:textColor="#000000"
+      android:textSize="20sp"
+      android:textStyle="bold"
+      android:background="@drawable/button_splash_style"
+      android:layout_marginBottom="60dp"
+      android:stateListAnimator="@null"
+      android:fontFamily="sans-serif-black" />
+
+  </LinearLayout>
+
+</FrameLayout>

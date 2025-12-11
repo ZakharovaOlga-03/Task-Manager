@@ -14,7 +14,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private AuthManager authManager;
     private Handler handler = new Handler();
-    private static final int AUTO_REDIRECT_DELAY = 2000; // 2 секунды
+    private static final int AUTO_REDIRECT_DELAY = 7000; // 7 секунд
 
     @Override
     protected void onCreate(Bundle saved_instance_state) {

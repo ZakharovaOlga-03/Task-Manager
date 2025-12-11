@@ -111,10 +111,27 @@
         android:spinnerMode="dropdown"
         android:layout_marginBottom="@dimen/padding_16" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Значимость"
+            android:textSize="@dimen/text_size_14"
+            android:textColor="@color/white_text"
+            android:layout_marginBottom="@dimen/padding_8" />
+
+        <Spinner
+            android:id="@+id/spinner_priority"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:background="@drawable/input_bg"
+            android:popupBackground="@color/primary_dark"
+            android:spinnerMode="dropdown"
+            android:layout_marginBottom="@dimen/padding_16" />
+
       <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Дата"
+        android:text="Дата окончания"
         android:textSize="@dimen/text_size_14"
         android:textColor="@color/white_text"
         android:layout_marginBottom="@dimen/padding_8" />
@@ -219,7 +236,31 @@
         android:spinnerMode="dropdown"
         android:layout_marginBottom="@dimen/padding_20" />
 
-      <Button
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="Заметки"
+          android:textSize="@dimen/text_size_14"
+          android:textColor="@color/white_text"
+          android:layout_marginBottom="@dimen/padding_8"/>
+
+        <EditText
+            android:id="@+id/et_task_note"
+            android:layout_width="match_parent"
+            android:layout_height="96dp"
+            android:background="@drawable/input_bg"
+            android:hint="Пояснения к задаче"
+            android:gravity="top"
+            android:paddingTop="10dp"
+            android:textColorHint="@color/hint_text"
+            android:textColor="@color/text_primary"
+            android:textSize="@dimen/text_size_14"
+            android:paddingHorizontal="@dimen/padding_16"
+            android:focusable="false"
+            android:cursorVisible="false"
+            android:layout_marginBottom="@dimen/padding_20"/>
+
+        <Button
         android:id="@+id/btn_create_task"
         android:layout_width="match_parent"
         android:layout_height="56dp"

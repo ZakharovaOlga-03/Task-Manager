@@ -1,5 +1,6 @@
 package com.example.app;
 
+import android.util.Log;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.os.Build;
@@ -19,38 +20,78 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
-import com.example.app.ApiResponse;
-import com.example.app.ApiService;
-import com.example.app.RetrofitClient;
-import com.example.app.Task;
-import com.example.app.SharedPrefs;
+import com.example.app.data.local.AppDatabase;
+import com.example.app.data.local.entities.TaskEntity;
+import com.example.app.data.repository.TaskRepository;
+import com.example.app.utils.NetworkUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-
 public class AddTaskActivity extends AppCompatActivity {
 
-    private EditText et_task_name, et_date, et_start_time, et_end_time;
-    private Spinner spinner_category, spinner_reminder;
+    // UI элементы
+    private EditText et_task_name, et_date, et_start_time, et_end_time, et_task_note;
+    private Spinner spinner_category, spinner_reminder, spinner_status, spinner_priority;
     private Button btn_create_task;
+
     private Calendar calendar;
 
+    // Для работы с данными
+    private TaskRepository taskRepository;
+    private NetworkUtils networkUtils;
     private ApiService apiService;
     private int currentUserId;
+
+    // Статические списки для выбора
+    private static final String[] CATEGORIES = {"Здоровье", "Работа", "Образование", "Развлечения", "Личное"};
+    private static final String[] REMINDERS = {"Не напоминать", "За 30 минут", "За 1 час", "За 3 часа", "За 1 день", "Каждый час"};
+    private static final String[] STATUSES = {"pending", "in_progress", "completed", "cancelled"};
+    private static final String[] PRIORITIES = {"1 (Низкий)", "2", "3 (Средний)", "4", "5 (Высокий)"};
+
+    // Маппинги для преобразования
+    private static final Map<String, String> CATEGORY_TO_TYPE = new HashMap<String, String>() {{
+        put("Здоровье", "heart");
+        put("Работа", "meeting");
+        put("Образование", "book");
+        put("Развлечения", "coffee");
+        put("Личное", "heart");
+    }};
+
+    private static final Map<String, String> REMINDER_TO_FREQUENCY = new HashMap<String, String>() {{
+        put("Не напоминать", null);
+        put("За 30 минут", "30min");
+        put("За 1 час", "1hour");
+        put("За 3 часа", "3hours");
+        put("За 1 день", "1day");
+        put("Каждый час", "1hour_repeat");
+    }};
+
+    private static final Map<String, String> PRIORITY_TO_IMPORTANCE = new HashMap<String, String>() {{
+        put("1 (Низкий)", "1");
+        put("2", "2");
+        put("3 (Средний)", "3");
+        put("4", "4");
+        put("5 (Высокий)", "5");
+    }};
+
+    private static final Map<String, Integer> CATEGORY_BONUS = new HashMap<String, Integer>() {{
+        put("Здоровье", 15);
+        put("Работа", 20);
+        put("Образование", 18);
+        put("Развлечения", 10);
+        put("Личное", 12);
+    }};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setup_transparent_navigation();
-
         setContentView(R.layout.activity_add_task);
 
         // Проверка авторизации
@@ -67,10 +108,16 @@ public class AddTaskActivity extends AppCompatActivity {
             return;
         }
 
-        // Инициализация Retrofit
-        apiService = RetrofitClient.getApiService();
-
+        // Инициализация компонентов
         calendar = Calendar.getInstance();
+
+        // Инициализация локальной БД и репозитория
+        AppDatabase database = AppDatabase.getInstance(this);
+        taskRepository = new TaskRepository(getApplication());
+        networkUtils = new NetworkUtils(this);
+
+        // Инициализация Retrofit (для онлайн-режима)
+        apiService = RetrofitClient.getApiService();
 
         init_views();
         setup_spinners();
@@ -110,8 +157,12 @@ public class AddTaskActivity extends AppCompatActivity {
         et_date = findViewById(R.id.et_date);
         et_start_time = findViewById(R.id.et_start_time);
         et_end_time = findViewById(R.id.et_end_time);
+        et_task_note = findViewById(R.id.et_task_note); // Новое поле для заметок
+
         spinner_category = findViewById(R.id.spinner_category);
         spinner_reminder = findViewById(R.id.spinner_reminder);
+        spinner_priority = findViewById(R.id.spinner_priority); // Новый спиннер для приоритета
+
         btn_create_task = findViewById(R.id.btn_create_task);
 
         btn_create_task.setOnClickListener(v -> create_task());
@@ -140,15 +191,33 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     private void setup_spinners() {
-        String[] categories = {"Здоровье", "Работа", "Образование", "Развлечения"};
-        ArrayAdapter<String> category_adapter = new ArrayAdapter<>(this, R.layout.spinner_item, categories);
+        // Категории задач
+        ArrayAdapter<String> category_adapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item, CATEGORIES);
         category_adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinner_category.setAdapter(category_adapter);
 
-        String[] reminders = {"Каждый час", "За 30 минут", "За 1 час", "Не напоминать"};
-        ArrayAdapter<String> reminder_adapter = new ArrayAdapter<>(this, R.layout.spinner_item, reminders);
+        // Напоминания
+        ArrayAdapter<String> reminder_adapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item, REMINDERS);
         reminder_adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinner_reminder.setAdapter(reminder_adapter);
+
+        // Статусы задач (новый спиннер)
+        ArrayAdapter<String> status_adapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item, STATUSES);
+        status_adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spinner_status.setAdapter(status_adapter);
+
+        // Приоритеты (новый спиннер)
+        ArrayAdapter<String> priority_adapter = new ArrayAdapter<>(this,
+                R.layout.spinner_item, PRIORITIES);
+        priority_adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        spinner_priority.setAdapter(priority_adapter);
+
+        // Установить значения по умолчанию
+        spinner_status.setSelection(0); // "pending"
+        spinner_priority.setSelection(2); // "3 (Средний)"
     }
 
     private void setup_date_time_pickers() {
@@ -197,6 +266,9 @@ public class AddTaskActivity extends AppCompatActivity {
         String category = spinner_category.getSelectedItem().toString();
         String reminder = spinner_reminder.getSelectedItem().toString();
 
+        String priority = spinner_priority.getSelectedItem().toString();
+        String taskNote = et_task_note.getText().toString().trim();
+
         // Валидация
         if (taskName.isEmpty()) {
             Toast.makeText(this, "Введите название задачи", Toast.LENGTH_SHORT).show();
@@ -208,141 +280,246 @@ public class AddTaskActivity extends AppCompatActivity {
             return;
         }
 
-        // Преобразование времени для БД
-        String taskGoalDate = date + " " + endTime + ":00";
-        String notifyStart = date + " " + startTime + ":00";
+        try {
+            // Преобразование времени для БД
+            Date taskGoalDate = parseDateTime(date + " " + endTime + ":00");
+            Date notifyStart = parseDateTime(date + " " + startTime + ":00");
 
-        // Определение типа задачи на основе категории
-        String taskType = mapCategoryToTaskType(category);
+            // Проверка, что время окончания позже времени начала
+            if (taskGoalDate.before(notifyStart)) {
+                Toast.makeText(this, "Время окончания должно быть позже времени начала",
+                        Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        // Определение важности на основе напоминания
-        String taskImportance = mapReminderToImportance(reminder);
+            // Преобразование выбранных значений
+            String taskType = mapCategoryToTaskType(category);
+            String taskImportance = mapPriorityToImportance(priority);
+            String notifyFrequency = mapReminderToFrequency(reminder);
+            String notifyType = "notification"; // По умолчанию уведомление
+            int taskReward = calculateReward(category, taskImportance);
 
-        // Определение награды
-        int taskReward = calculateReward(category, taskImportance);
+            // Создание объекта TaskEntity для локальной БД
+            TaskEntity newTask = createTaskEntity(
+                    taskName, taskType, taskImportance, taskGoalDate,
+                    notifyStart, notifyFrequency, notifyType, taskNote,
+                    taskReward, "pending"
+            );
 
-        // Определение частоты напоминания
-        String notifyFrequency = mapReminderToFrequency(reminder);
-        String notifyType = "notification"; // По умолчанию уведомление
+            // Показать прогресс
+            btn_create_task.setEnabled(false);
+            btn_create_task.setText("Создание...");
 
-        // Создание объекта задачи для API
-        Task newTask = new Task();
-        newTask.setUserId(currentUserId);
-        newTask.setTaskName(taskName);
-        newTask.setTaskType(taskType);
-        newTask.setTaskImportance(taskImportance);
-        newTask.setTaskGoalDate(taskGoalDate);
-        newTask.setNotifyStart(notifyStart);
-        newTask.setNotifyFrequency(notifyFrequency);
-        newTask.setNotifyType(notifyType);
-        newTask.setTaskNote(category); // Используем категорию как заметку
-        newTask.setTaskReward(taskReward);
+            // Сохранить задачу в локальную БД (оффлайн-первый подход)
+            saveTaskToLocalDatabase(newTask);
 
-        // Показать прогресс
-        btn_create_task.setEnabled(false);
-        btn_create_task.setText("Создание...");
+        } catch (Exception e) {
+            Toast.makeText(this, "Ошибка при создании задачи: " + e.getMessage(),
+                    Toast.LENGTH_LONG).show();
+            e.printStackTrace();
+        }
+    }
 
-        // Отправка задачи на сервер через API
-        Call<ApiResponse> call = apiService.createTask(newTask);
-        call.enqueue(new Callback<ApiResponse>() {
+    private Date parseDateTime(String dateTimeString) throws java.text.ParseException {
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        return format.parse(dateTimeString);
+    }
+
+    private TaskEntity createTaskEntity(
+            String taskName, String taskType, String taskImportance,
+            Date taskGoalDate, Date notifyStart, String notifyFrequency,
+            String notifyType, String taskNote, int taskReward, String status) {
+
+        TaskEntity task = new TaskEntity();
+
+        // Основные поля
+        task.setUserId(currentUserId);
+        task.setTaskName(taskName);
+        task.setTaskType(taskType);
+        task.setTaskImportance(taskImportance);
+        task.setTaskGoalDate(taskGoalDate);
+        task.setNotifyStart(notifyStart);
+        task.setNotifyFrequency(notifyFrequency);
+        task.setNotifyType(notifyType);
+        task.setTaskNote(taskNote);
+        task.setTaskReward(taskReward);
+        task.setStatus(status);
+
+        // Дополнительные поля из TaskEntity
+        task.setTaskCreationDate(new Date());
+        task.setUpdatedAt(new Date());
+
+        // Установить sync_status в зависимости от наличия сети
+        if (networkUtils.isNetworkAvailable()) {
+            task.setSyncStatus("pending"); // Будет отправлено на сервер
+        } else {
+            task.setSyncStatus("offline"); // Только локальное сохранение
+        }
+
+        // Установить completedAt если задача создается выполненной
+        if ("completed".equals(status)) {
+            task.setCompletedAt(new Date());
+        }
+
+        return task;
+    }
+
+    private void saveTaskToLocalDatabase(TaskEntity task) {
+        taskRepository.createTask(task, new TaskRepository.TaskCallback() {
             @Override
-            public void onResponse(Call<ApiResponse> call, Response<ApiResponse> response) {
+            public void onSuccess(TaskEntity savedTask) {
                 runOnUiThread(() -> {
                     btn_create_task.setEnabled(true);
                     btn_create_task.setText("Создать задачу");
 
-                    if (response.isSuccessful() && response.body() != null) {
-                        ApiResponse apiResponse = response.body();
-
-                        if (apiResponse.isSuccess()) {
-                            Toast.makeText(AddTaskActivity.this,
-                                    apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
-
-                            // Отправить результат обратно в MainActivity
-                            setResult(RESULT_OK);
-                            finish();
-                        } else {
-                            Toast.makeText(AddTaskActivity.this,
-                                    "Ошибка: " + apiResponse.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
+                    // Проверить наличие сети для отправки на сервер
+                    if (networkUtils.isNetworkAvailable()) {
+                        // Отправить задачу на сервер в фоне
+                        sendTaskToServer(savedTask);
+                        Toast.makeText(AddTaskActivity.this,
+                                "Задача создана и отправлена на сервер",
+                                Toast.LENGTH_SHORT).show();
                     } else {
-                        try {
-                            String errorBody = response.errorBody() != null ?
-                                    response.errorBody().string() : "Неизвестная ошибка";
-                            Toast.makeText(AddTaskActivity.this,
-                                    "Ошибка сервера: " + response.code() + " - " + errorBody,
-                                    Toast.LENGTH_LONG).show();
-                        } catch (Exception e) {
-                            Toast.makeText(AddTaskActivity.this,
-                                    "Ошибка сервера: " + response.code(), Toast.LENGTH_SHORT).show();
-                        }
+                        Toast.makeText(AddTaskActivity.this,
+                                "Задача сохранена локально. Синхронизируется при подключении",
+                                Toast.LENGTH_LONG).show();
                     }
+
+                    // Отправить результат обратно в MainActivity
+                    setResult(RESULT_OK);
+                    finish();
                 });
             }
 
             @Override
-            public void onFailure(Call<ApiResponse> call, Throwable t) {
+            public void onError(String error) {
                 runOnUiThread(() -> {
                     btn_create_task.setEnabled(true);
                     btn_create_task.setText("Создать задачу");
 
                     Toast.makeText(AddTaskActivity.this,
-                            "Ошибка сети: " + t.getMessage(), Toast.LENGTH_LONG).show();
-                    t.printStackTrace(); // Для отладки
+                            "Ошибка сохранения задачи: " + error,
+                            Toast.LENGTH_LONG).show();
                 });
             }
         });
     }
 
-    // Преобразование категории в тип задачи для БД
-    private String mapCategoryToTaskType(String category) {
-        Map<String, String> categoryMap = new HashMap<>();
-        categoryMap.put("Здоровье", "heart");
-        categoryMap.put("Работа", "meeting");
-        categoryMap.put("Образование", "book");
-        categoryMap.put("Развлечения", "coffee");
+    private void sendTaskToServer(TaskEntity task) {
+        // Преобразовать TaskEntity в Task (для API)
+        Task apiTask = convertToApiTask(task);
 
-        return categoryMap.getOrDefault(category, "book");
+        // Отправка задачи на сервер через API
+        retrofit2.Call<ApiResponse> call = apiService.createTask(apiTask);
+        call.enqueue(new retrofit2.Callback<ApiResponse>() {
+            @Override
+            public void onResponse(retrofit2.Call<ApiResponse> call,
+                                   retrofit2.Response<ApiResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    ApiResponse apiResponse = response.body();
+
+                    if (apiResponse.isSuccess()) {
+                        // Обновить локальную запись с server_id
+                        task.setServerId(apiResponse.getTaskId());
+                        task.setSyncStatus("synced");
+                        task.setLastSyncDate(new Date());
+
+                        // Обновить в БД в фоне
+                        updateTaskInDatabase(task);
+                    } else {
+                        // Сервер вернул ошибку
+                        task.setSyncStatus("failed");
+                        updateTaskInDatabase(task);
+                        Log.e("AddTaskActivity", "Server error: " + apiResponse.getMessage());
+                    }
+                } else {
+                    // Ошибка HTTP
+                    task.setSyncStatus("failed");
+                    updateTaskInDatabase(task);
+                    Log.e("AddTaskActivity", "HTTP error: " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(retrofit2.Call<ApiResponse> call, Throwable t) {
+                // Ошибка сети
+                task.setSyncStatus("failed");
+                updateTaskInDatabase(task);
+                Log.e("AddTaskActivity", "Network error: " + t.getMessage());
+            }
+        });
     }
 
-    // Преобразование напоминания в важность задачи
-    private String mapReminderToImportance(String reminder) {
-        Map<String, String> importanceMap = new HashMap<>();
-        importanceMap.put("Каждый час", "5");     // Высокая важность
-        importanceMap.put("За 30 минут", "4");    // Средне-высокая
-        importanceMap.put("За 1 час", "3");       // Средняя
-        importanceMap.put("Не напоминать", "2");  // Низкая
+    private void updateTaskInDatabase(TaskEntity task) {
+        new Thread(() -> {
+            try {
+                AppDatabase.getInstance(AddTaskActivity.this)
+                        .taskDao()
+                        .updateTask(task);
+            } catch (Exception e) {
+                Log.e("AddTaskActivity", "Error updating task in DB: " + e.getMessage());
+            }
+        }).start();
+    }
 
-        return importanceMap.getOrDefault(reminder, "3");
+    private Task convertToApiTask(TaskEntity entity) {
+        Task task = new Task();
+
+        // Основные поля
+        task.setUserId(entity.getUserId());
+        task.setTaskName(entity.getTaskName());
+        task.setTaskType(entity.getTaskType());
+        task.setTaskImportance(entity.getTaskImportance());
+
+        // Преобразование дат в строки
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        if (entity.getTaskGoalDate() != null) {
+            task.setTaskGoalDate(format.format(entity.getTaskGoalDate()));
+        }
+        if (entity.getNotifyStart() != null) {
+            task.setNotifyStart(format.format(entity.getNotifyStart()));
+        }
+
+        task.setNotifyFrequency(entity.getNotifyFrequency());
+        task.setNotifyType(entity.getNotifyType());
+        task.setTaskNote(entity.getTaskNote());
+        task.setTaskReward(entity.getTaskReward());
+
+        // Если есть server_id, установить его
+        if (entity.getServerId() > 0) {
+            task.setIdTask(entity.getServerId());
+        }
+
+        return task;
+    }
+
+    // Преобразование категории в тип задачи для БД
+    private String mapCategoryToTaskType(String category) {
+        return CATEGORY_TO_TYPE.getOrDefault(category, "book");
+    }
+
+    // Преобразование приоритета в важность задачи
+    private String mapPriorityToImportance(String priority) {
+        return PRIORITY_TO_IMPORTANCE.getOrDefault(priority, "3");
     }
 
     // Преобразование напоминания в частоту
     private String mapReminderToFrequency(String reminder) {
-        Map<String, String> frequencyMap = new HashMap<>();
-        frequencyMap.put("Каждый час", "1hour");
-        frequencyMap.put("За 30 минут", "30min");
-        frequencyMap.put("За 1 час", "1hour");
-        frequencyMap.put("Не напоминать", null); // NULL для отключения
-
-        return frequencyMap.get(reminder);
+        return REMINDER_TO_FREQUENCY.get(reminder);
     }
 
     // Расчет награды за задачу
     private int calculateReward(String category, String importance) {
         int baseReward = 10;
-
-        // Бонус за категорию
-        Map<String, Integer> categoryBonus = new HashMap<>();
-        categoryBonus.put("Здоровье", 5);
-        categoryBonus.put("Работа", 8);
-        categoryBonus.put("Образование", 7);
-        categoryBonus.put("Развлечения", 3);
-
-        int bonus = categoryBonus.getOrDefault(category, 0);
-
-        // Множитель важности
+        int bonus = CATEGORY_BONUS.getOrDefault(category, 0);
         int importanceMultiplier = Integer.parseInt(importance);
 
         return baseReward + (bonus * importanceMultiplier);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Можно очистить ресурсы если нужно
     }
 }

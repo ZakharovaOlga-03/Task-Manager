@@ -61,4 +61,15 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.10.0")
+
+    // Room components
+    implementation("androidx.room:room-runtime:2.6.1")
+    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    // LiveData для наблюдения за изменениями
+    implementation("androidx.lifecycle:lifecycle-livedata:2.7.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel:2.7.0")
+    // Для работы с датами
+    implementation("joda-time:joda-time:2.12.5")
+    // Для удобной работы с потоками
+    implementation("com.google.guava:guava:31.1-android")
 }

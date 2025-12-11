@@ -1,319 +1,333 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:background="@color/primary_dark"
-  android:fitsSystemWindows="true">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary_dark"
+    android:fitsSystemWindows="true">
 
   <ScrollView
-    android:id="@+id/scroll_view"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:clipToPadding="false"
-    android:fillViewport="true"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintBottom_toTopOf="@+id/bottom_card"
-    tools:layout_editor_absoluteX="0dp">
+      android:id="@+id/scroll_view"
+      android:layout_width="match_parent"
+      android:layout_height="0dp"
+      android:clipToPadding="false"
+      android:fillViewport="true"
+      app:layout_constraintTop_toTopOf="parent"
+      app:layout_constraintBottom_toTopOf="@+id/bottom_card"
+      tools:layout_editor_absoluteX="0dp">
 
     <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:orientation="vertical">
-
-      <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/primary_dark"
-        android:orientation="vertical"
-        android:paddingHorizontal="@dimen/padding_16"
-        android:paddingTop="@dimen/padding_24">
+        android:orientation="vertical">
 
-        <LinearLayout
+      <LinearLayout
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:gravity="center_vertical"
-          android:orientation="horizontal"
-          android:paddingBottom="@dimen/padding_16">
+          android:background="@color/primary_dark"
+          android:orientation="vertical"
+          android:paddingHorizontal="@dimen/padding_16"
+          android:paddingTop="@dimen/padding_24">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingBottom="@dimen/padding_16">
 
           <ImageView
-            android:id="@+id/menu_btn"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_menu"
-            android:contentDescription="Menu"
-            android:scaleType="fitXY"
-            app:tint="#FFFFFF" />
+              android:id="@+id/menu_btn"
+              android:layout_width="32dp"
+              android:layout_height="32dp"
+              android:src="@drawable/ic_menu"
+              android:contentDescription="Menu"
+              android:scaleType="fitXY"
+              app:tint="#FFFFFF" />
 
           <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+              android:layout_width="0dp"
+              android:layout_height="1dp"
+              android:layout_weight="1" />
 
           <ImageView
-            android:id="@+id/search_btn"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:contentDescription="Search"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_search"
-            app:tint="#FFFFFF" />
+              android:id="@+id/search_btn"
+              android:layout_width="32dp"
+              android:layout_height="32dp"
+              android:contentDescription="Search"
+              android:scaleType="fitXY"
+              android:src="@drawable/ic_search"
+              app:tint="#FFFFFF" />
 
         </LinearLayout>
 
         <TextView
-          android:layout_width="wrap_content"
-          android:layout_height="wrap_content"
-          android:paddingBottom="@dimen/padding_24"
-          android:text="Статистика"
-          android:textColor="@color/white_text"
-          android:textSize="@dimen/text_size_24"
-          android:textStyle="bold" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="@dimen/padding_24"
+            android:text="Статистика"
+            android:textColor="@color/white_text"
+            android:textSize="@dimen/text_size_24"
+            android:textStyle="bold" />
 
       </LinearLayout>
 
       <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:paddingHorizontal="@dimen/padding_16"
-        android:paddingBottom="@dimen/padding_16">
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:paddingHorizontal="@dimen/padding_16"
+          android:paddingBottom="@dimen/padding_16">
 
+        <!-- Всего задач -->
         <LinearLayout
-          android:layout_width="0dp"
-          android:layout_height="120dp"
-          android:layout_marginEnd="8dp"
-          android:layout_weight="1"
-          android:background="@drawable/stat_card_bg1"
-          android:gravity="center"
-          android:orientation="vertical"
-          android:padding="@dimen/padding_16">
+            android:id="@+id/total_tasks_card"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_marginEnd="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/stat_card_bg1"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_16">
 
           <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="10"
-            android:textColor="@color/white_text"
-            android:textSize="36sp"
-            android:textStyle="bold" />
+              android:id="@+id/tv_total_tasks"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="0"
+              android:textColor="@color/white_text"
+              android:textSize="36sp"
+              android:textStyle="bold" />
 
           <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/padding_4"
-            android:text="Всего задач"
-            android:textColor="@color/light_text"
-            android:textSize="@dimen/text_size_12" />
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="@dimen/padding_4"
+              android:text="Всего задач"
+              android:textColor="@color/light_text"
+              android:textSize="@dimen/text_size_12" />
 
         </LinearLayout>
 
+        <!-- Выполнено -->
         <LinearLayout
-          android:layout_width="0dp"
-          android:layout_height="120dp"
-          android:layout_marginStart="8dp"
-          android:layout_weight="1"
-          android:background="@drawable/stat_card_bg2"
-          android:gravity="center"
-          android:orientation="vertical"
-          android:padding="@dimen/padding_16">
+            android:id="@+id/completed_tasks_card"
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:background="@drawable/stat_card_bg2"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="@dimen/padding_16">
 
           <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="1"
-            android:textColor="@color/white_text"
-            android:textSize="36sp"
-            android:textStyle="bold" />
+              android:id="@+id/tv_completed_tasks"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:text="0"
+              android:textColor="@color/white_text"
+              android:textSize="36sp"
+              android:textStyle="bold" />
 
           <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/padding_4"
-            android:text="Выполнено"
-            android:textColor="@color/light_text"
-            android:textSize="@dimen/text_size_12" />
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:layout_marginTop="@dimen/padding_4"
+              android:text="Выполнено"
+              android:textColor="@color/light_text"
+              android:textSize="@dimen/text_size_12" />
 
         </LinearLayout>
-
 
       </LinearLayout>
 
-
     </LinearLayout>
-
 
   </ScrollView>
 
-
-
-
+  <!-- Карточка с прогресс-барами -->
   <LinearLayout
-    android:id="@+id/bottom_card"
-    android:layout_width="match_parent"
-    android:layout_height="350dp"
-    android:layout_marginTop="@dimen/padding_16"
-    android:background="@drawable/card_content_rounded"
-    android:orientation="vertical"
-    android:padding="@dimen/padding_20"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" >
+      android:id="@+id/bottom_card"
+      android:layout_width="match_parent"
+      android:layout_height="350dp"
+      android:layout_marginTop="@dimen/padding_16"
+      android:background="@drawable/card_content_rounded"
+      android:orientation="vertical"
+      android:padding="@dimen/padding_20"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent">
 
     <TextView
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="@dimen/padding_16"
-      android:text="Процент выполнения"
-      android:textColor="@color/text_primary"
-      android:textSize="@dimen/text_size_16"
-      android:textStyle="bold" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/padding_16"
+        android:text="Процент выполнения по категориям"
+        android:textColor="@color/text_primary"
+        android:textSize="@dimen/text_size_16"
+        android:textStyle="bold" />
 
+    <!-- Работа -->
     <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="@dimen/padding_12"
-      android:gravity="center_vertical"
-      android:orientation="horizontal">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/padding_12"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
       <TextView
-        android:layout_width="80dp"
-        android:layout_height="wrap_content"
-        android:text="Работа"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/text_size_14" />
+          android:layout_width="80dp"
+          android:layout_height="wrap_content"
+          android:text="Работа"
+          android:textColor="@color/text_primary"
+          android:textSize="@dimen/text_size_14" />
 
       <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="8dp"
-        android:layout_marginEnd="@dimen/padding_12"
-        android:layout_weight="1"
-        android:progress="85"
-        android:progressDrawable="@drawable/progress_bar_purple" />
+          android:id="@+id/pb_work"
+          style="?android:attr/progressBarStyleHorizontal"
+          android:layout_width="0dp"
+          android:layout_height="8dp"
+          android:layout_marginEnd="@dimen/padding_12"
+          android:layout_weight="1"
+          android:progress="0"
+          android:progressDrawable="@drawable/progress_bar_purple" />
 
       <TextView
-        android:layout_width="40dp"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:text="85%"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/text_size_14"
-        android:textStyle="bold" />
+          android:id="@+id/tv_work_percent"
+          android:layout_width="40dp"
+          android:layout_height="wrap_content"
+          android:gravity="end"
+          android:text="0%"
+          android:textColor="@color/text_primary"
+          android:textSize="@dimen/text_size_14"
+          android:textStyle="bold" />
 
     </LinearLayout>
 
+    <!-- Личное -->
     <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="@dimen/padding_12"
-      android:gravity="center_vertical"
-      android:orientation="horizontal">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/padding_12"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
       <TextView
-        android:layout_width="80dp"
-        android:layout_height="wrap_content"
-        android:text="Личное"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/text_size_14" />
+          android:layout_width="80dp"
+          android:layout_height="wrap_content"
+          android:text="Личное"
+          android:textColor="@color/text_primary"
+          android:textSize="@dimen/text_size_14" />
 
       <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="8dp"
-        android:layout_marginEnd="@dimen/padding_12"
-        android:layout_weight="1"
-        android:progress="70"
-        android:progressDrawable="@drawable/progress_bar_blue" />
+          android:id="@+id/pb_personal"
+          style="?android:attr/progressBarStyleHorizontal"
+          android:layout_width="0dp"
+          android:layout_height="8dp"
+          android:layout_marginEnd="@dimen/padding_12"
+          android:layout_weight="1"
+          android:progress="0"
+          android:progressDrawable="@drawable/progress_bar_blue" />
 
       <TextView
-        android:layout_width="40dp"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:text="70%"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/text_size_14"
-        android:textStyle="bold" />
+          android:id="@+id/tv_personal_percent"
+          android:layout_width="40dp"
+          android:layout_height="wrap_content"
+          android:gravity="end"
+          android:text="0%"
+          android:textColor="@color/text_primary"
+          android:textSize="@dimen/text_size_14"
+          android:textStyle="bold" />
 
     </LinearLayout>
 
+    <!-- Здоровье -->
     <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:layout_marginBottom="@dimen/padding_12"
-      android:gravity="center_vertical"
-      android:orientation="horizontal">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/padding_12"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
       <TextView
-        android:layout_width="80dp"
-        android:layout_height="wrap_content"
-        android:text="Здоровье"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/text_size_14" />
+          android:layout_width="80dp"
+          android:layout_height="wrap_content"
+          android:text="Здоровье"
+          android:textColor="@color/text_primary"
+          android:textSize="@dimen/text_size_14" />
 
       <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="8dp"
-        android:layout_marginEnd="@dimen/padding_12"
-        android:layout_weight="1"
-        android:progress="95"
-        android:progressDrawable="@drawable/progress_bar_green" />
+          android:id="@+id/pb_health"
+          style="?android:attr/progressBarStyleHorizontal"
+          android:layout_width="0dp"
+          android:layout_height="8dp"
+          android:layout_marginEnd="@dimen/padding_12"
+          android:layout_weight="1"
+          android:progress="0"
+          android:progressDrawable="@drawable/progress_bar_green" />
 
       <TextView
-        android:layout_width="40dp"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:text="95%"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/text_size_14"
-        android:textStyle="bold" />
+          android:id="@+id/tv_health_percent"
+          android:layout_width="40dp"
+          android:layout_height="wrap_content"
+          android:gravity="end"
+          android:text="0%"
+          android:textColor="@color/text_primary"
+          android:textSize="@dimen/text_size_14"
+          android:textStyle="bold" />
 
     </LinearLayout>
 
+    <!-- Учеба -->
     <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:gravity="center_vertical"
-      android:orientation="horizontal">
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
       <TextView
-        android:layout_width="80dp"
-        android:layout_height="wrap_content"
-        android:text="Учеба"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/text_size_14" />
+          android:layout_width="80dp"
+          android:layout_height="wrap_content"
+          android:text="Учеба"
+          android:textColor="@color/text_primary"
+          android:textSize="@dimen/text_size_14" />
 
       <ProgressBar
-        style="?android:attr/progressBarStyleHorizontal"
-        android:layout_width="0dp"
-        android:layout_height="8dp"
-        android:layout_marginEnd="@dimen/padding_12"
-        android:layout_weight="1"
-        android:progress="60"
-        android:progressDrawable="@drawable/progress_bar_orange" />
+          android:id="@+id/pb_study"
+          style="?android:attr/progressBarStyleHorizontal"
+          android:layout_width="0dp"
+          android:layout_height="8dp"
+          android:layout_marginEnd="@dimen/padding_12"
+          android:layout_weight="1"
+          android:progress="0"
+          android:progressDrawable="@drawable/progress_bar_orange" />
 
       <TextView
-        android:layout_width="40dp"
-        android:layout_height="wrap_content"
-        android:gravity="end"
-        android:text="60%"
-        android:textColor="@color/text_primary"
-        android:textSize="@dimen/text_size_14"
-        android:textStyle="bold" />
+          android:id="@+id/tv_study_percent"
+          android:layout_width="40dp"
+          android:layout_height="wrap_content"
+          android:gravity="end"
+          android:text="0%"
+          android:textColor="@color/text_primary"
+          android:textSize="@dimen/text_size_14"
+          android:textStyle="bold" />
 
     </LinearLayout>
 
   </LinearLayout>
 
+  <!-- Нижняя навигация -->
   <include
-    android:id="@+id/bottom_nav_container"
-    layout="@layout/bottom_navigation"
-    android:layout_width="0dp"
-    android:layout_height="wrap_content"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent" />
+      android:id="@+id/bottom_nav_container"
+      layout="@layout/bottom_navigation"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      app:layout_constraintBottom_toBottomOf="parent"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -75,4 +75,14 @@ public class User {
 
     public boolean isActive() { return is_active; }
     public void setActive(boolean active) { is_active = active; }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "idusers=" + idusers +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", coins=" + coins +
+                '}';
+    }
 }

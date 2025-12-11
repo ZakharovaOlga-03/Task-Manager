@@ -478,14 +478,35 @@ public class MainActivity extends AppCompatActivity {
         } else {
             tv_no_tasks.setVisibility(View.GONE);
             task_adapter = new TaskAdapter(task_list, this);
+
+            // Добавляем слушатель изменения статуса
+            task_adapter.setOnTaskStatusChangedListener(new TaskAdapter.OnTaskStatusChangedListener() {
+                @Override
+                public void onTaskStatusChanged() {
+                    // При изменении статуса задачи можно обновить статистику
+                    Log.d(TAG, "Task status changed");
+                    // Можно добавить обновление статистики или другие действия
+                }
+            });
+
             rv_tasks.setAdapter(task_adapter);
             rv_tasks.setVisibility(View.VISIBLE);
         }
     }
 
+
     private Task convertApiTaskToDisplayTask(Task apiTask) {
         try {
+            Log.d(TAG, "Converting task: ID=" + apiTask.getId() +
+                    ", Name=" + apiTask.getTaskName() +
+                    ", Status=" + apiTask.getTaskStatus() +
+                    ", IsCompleted=" + apiTask.is_completed());
+
             Task displayTask = new Task();
+
+            // Копируем ID из API
+            displayTask.setIdTask(apiTask.getIdTask());
+            displayTask.setId(apiTask.getIdTask());
 
             // 1. Время
             String timeRange = formatTimeRangeFromDatabase(
@@ -512,13 +533,31 @@ public class MainActivity extends AppCompatActivity {
             );
             displayTask.set_duration(duration);
 
-            // 5. Статус
-            String status = getTaskStatus(apiTask);
+            // 5. Статус - проверяем, есть ли уже статус в API
+            String status;
+            if (apiTask.get_status() != null && !apiTask.get_status().isEmpty()) {
+                status = apiTask.get_status();
+            } else if (apiTask.getTaskStatus() != null && !apiTask.getTaskStatus().isEmpty()) {
+                status = apiTask.getTaskStatus();
+            } else {
+                status = getTaskStatus(apiTask); // вычисляем по дате
+            }
             displayTask.set_status(status);
 
             // 6. Завершена ли задача
             boolean isCompleted = isTaskCompleted(apiTask);
             displayTask.set_completed(isCompleted);
+
+            // Копируем другие поля из API
+            displayTask.setTaskName(apiTask.getTaskName());
+            displayTask.setTaskType(apiTask.getTaskType());
+            displayTask.setTaskGoalDate(apiTask.getTaskGoalDate());
+            displayTask.setNotifyStart(apiTask.getNotifyStart());
+            displayTask.setTaskStatus(apiTask.getTaskStatus());
+
+            Log.d(TAG, "Converted task: Title=" + displayTask.get_title() +
+                    ", Status=" + displayTask.get_status() +
+                    ", Completed=" + displayTask.is_completed());
 
             return displayTask;
 
@@ -637,9 +676,28 @@ public class MainActivity extends AppCompatActivity {
         return "в процессе";
     }
 
+    // Обновите метод isTaskCompleted для правильной проверки
     private boolean isTaskCompleted(Task apiTask) {
+        // 1. Проверяем локальное поле
+        if (apiTask.is_completed()) {
+            return true;
+        }
+
+        // 2. Проверяем по данным из БД
+        if (apiTask.isCompletedFromDB()) {
+            return true;
+        }
+
+        // 3. Проверяем статус из отображения
+        if (apiTask.get_status() != null &&
+                (apiTask.get_status().equals("выполнено") ||
+                        apiTask.get_status().equals("completed"))) {
+            return true;
+        }
+
         return false;
     }
+
 
     public void navigateCalendarPrevious() {
         // Перейти к предыдущей неделе
@@ -723,4 +781,6 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
         Log.d(TAG, "MainActivity destroyed");
     }
+
+
 }

@@ -4,12 +4,22 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import com.example.app.SharedPrefs;
+
 public class NetworkUtils {
 
     private Context context;
 
     public NetworkUtils(Context context) {
         this.context = context;
+    }
+
+    public boolean shouldSyncToServer(Context context) {
+        // Гостям не нужно синхронизироваться с сервером
+        if (SharedPrefs.isGuest(context)) {
+            return false;
+        }
+        return isNetworkAvailable();
     }
 
     public boolean isNetworkAvailable() {

@@ -29,38 +29,38 @@ public class SplashActivity extends AppCompatActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm", Locale.getDefault());
         time_view.setText(sdf.format(new Date()));
 
-        // Проверяем авторизацию сразу при запуске
-        checkAuthAndRedirect();
-
         // Обработчик кнопки "Начать"
         start_btn.setOnClickListener(v -> {
             // Отменяем автоматический переход
             handler.removeCallbacksAndMessages(null);
             // Запускаем ручной переход
-            redirectBasedOnAuth();
+            checkAndRestoreSession();
         });
 
         // Автоматический переход через 2 секунды
-        handler.postDelayed(() -> {
-            redirectBasedOnAuth();
-        }, AUTO_REDIRECT_DELAY);
+        handler.postDelayed(this::checkAndRestoreSession, AUTO_REDIRECT_DELAY);
     }
 
-    // Метод для проверки авторизации и перенаправления
-    private void checkAuthAndRedirect() {
-        // Можно предзагрузить какие-то данные здесь
-        // Например, проверить наличие локальных задач
+    private void checkAndRestoreSession() {
+        authManager.checkAndRestoreSession(new AuthManager.AuthCallback() {
+            @Override
+            public void onSuccess(AuthResponse response) {
+                runOnUiThread(() -> {
+                    // Уже авторизован - сразу переходим на MainActivity
+                    startMainActivity();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    // Не авторизован - показываем экран выбора
+                    startLoginActivity();
+                });
+            }
+        });
     }
 
-    private void redirectBasedOnAuth() {
-        if (authManager.isLoggedIn()) {
-            // Пользователь авторизован - сразу на MainActivity
-            startMainActivity();
-        } else {
-            // Не авторизован - на экран входа
-            startLoginActivity();
-        }
-    }
 
     private void startMainActivity() {
         Intent intent = new Intent(SplashActivity.this, MainActivity.class);

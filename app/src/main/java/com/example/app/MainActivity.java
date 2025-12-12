@@ -21,6 +21,8 @@ import com.example.app.ApiService;
 import com.example.app.RetrofitClient;
 import com.example.app.TasksResponse;
 import com.example.app.SharedPrefs;
+import com.example.app.utils.NetworkUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -48,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
 
     private AuthManager authManager;
     private ApiService apiService;
+    private NetworkUtils networkUtils;
 
     private Calendar currentCalendar;
     private int selectedDayPosition = 0;
@@ -66,8 +69,10 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
+        boolean isGuest = SharedPrefs.isGuest(this);
         int userId = SharedPrefs.getUserId(this);
-        Log.d(TAG, "User logged in with ID: " + userId);
+
+        Log.d(TAG, "User logged in with ID: " + userId + ", IsGuest: " + isGuest);
 
         setup_transparent_navigation();
         setContentView(R.layout.activity_main);
@@ -545,7 +550,7 @@ public class MainActivity extends AppCompatActivity {
             displayTask.set_status(status);
 
             // 6. Завершена ли задача
-            boolean isCompleted = isTaskCompleted(apiTask);
+            boolean isCompleted = apiTask.isTaskCompleted();
             displayTask.set_completed(isCompleted);
 
             // Копируем другие поля из API
@@ -679,7 +684,7 @@ public class MainActivity extends AppCompatActivity {
     // Обновите метод isTaskCompleted для правильной проверки
     private boolean isTaskCompleted(Task apiTask) {
         // 1. Проверяем локальное поле
-        if (apiTask.is_completed()) {
+        if (apiTask.isTaskCompleted()) {
             return true;
         }
 
@@ -698,7 +703,6 @@ public class MainActivity extends AppCompatActivity {
         return false;
     }
 
-
     public void navigateCalendarPrevious() {
         // Перейти к предыдущей неделе
         currentCalendar.add(Calendar.WEEK_OF_YEAR, -1);
@@ -711,16 +715,6 @@ public class MainActivity extends AppCompatActivity {
         currentCalendar.add(Calendar.WEEK_OF_YEAR, 1);
         setup_calendar();
         load_tasks_for_selected_day();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == 100 && resultCode == RESULT_OK) {
-            Log.d(TAG, "Returned from AddTaskActivity, refreshing tasks");
-            load_tasks_for_selected_day();
-        }
     }
 
     public void openAddTaskActivity() {
@@ -780,6 +774,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "MainActivity destroyed");
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 100 && resultCode == RESULT_OK) {
+            Log.d(TAG, "Returned from AddTaskActivity, refreshing tasks");
+            // Перезагрузить задачи из локальной БД
+            load_tasks_for_selected_day();
+
+            // Если есть интернет, запустить фоновую синхронизацию
+            if (networkUtils.isNetworkAvailable()) {
+                startSyncService();
+            }
+        }
+    }
+
+    private void startSyncService() {
+        // Запустить сервис для синхронизации локальных задач с сервером
+        Intent intent = new Intent(this, SyncService.class);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent);
+        } else {
+            startService(intent);
+        }
     }
 
 

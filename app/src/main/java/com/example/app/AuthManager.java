@@ -1,6 +1,5 @@
 package com.example.app;
 
-
 import android.content.Context;
 import android.util.Log;
 import com.example.app.ApiResponse;
@@ -14,22 +13,260 @@ import com.example.app.ValidationUtils;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import java.io.File;
+import java.util.Random;
 
 public class AuthManager {
     private static final String TAG = "AuthManager";
     private Context context;
     private ApiService apiService;
     private TaskSyncManager taskSyncManager;
+    private Random random;
+
+    // Константы для гостевых пользователей
+    private static final int GUEST_ID_START = -1000; // Отрицательные ID для гостей
+    private static final String GUEST_PREFIX = "Гость_";
 
     public AuthManager(Context context) {
         this.context = context;
         this.apiService = RetrofitClient.getApiService();
         this.taskSyncManager = new TaskSyncManager(context);
+        this.random = new Random();
     }
+
+    // ========== ОБНОВЛЁННЫЕ МЕТОДЫ ДЛЯ ГОСТЕВОЙ АУТЕНТИФИКАЦИИ ==========
+
+    // Вход как новый гость (создание нового гостевого аккаунта)
+    public void loginAsGuest(AuthCallback callback) {
+        Log.d(TAG, "Starting new guest login");
+
+        // Генерируем уникальный ID для гостя
+        int guestId = generateGuestId();
+        String guestName = generateGuestName();
+
+        Log.d(TAG, "Generated new guest: ID=" + guestId + ", Name=" + guestName);
+
+        // Сохраняем гостевую сессию
+        SharedPrefs.saveGuestSession(context, guestId, guestName);
+
+        // Создаем объект пользователя для ответа
+        User guestUser = createGuestUser(guestId, guestName);
+
+        // Загружаем локальные задачи гостя (если есть)
+        loadGuestTasks(guestId, guestUser, callback);
+    }
+
+    // Восстановление существующей гостевой сессии
+    public void restoreGuestSession(AuthCallback callback) {
+        Log.d(TAG, "Restoring existing guest session");
+
+        // Получаем сохраненного гостя из SharedPrefs
+        int guestId = SharedPrefs.getGuestId(context);
+        String guestName = SharedPrefs.getUserName(context);
+
+        if (guestId != -1 && guestName != null && !guestName.isEmpty()) {
+            Log.d(TAG, "Restoring existing guest: ID=" + guestId + ", Name=" + guestName);
+
+            // Восстанавливаем сессию
+            SharedPrefs.saveGuestSession(context, guestId, guestName);
+
+            User guestUser = createGuestUser(guestId, guestName);
+
+            // Загружаем задачи
+            loadGuestTasks(guestId, guestUser, callback);
+        } else {
+            // Нет сохраненного гостя - создаем нового
+            Log.d(TAG, "No existing guest found, creating new one");
+            loginAsGuest(callback);
+        }
+    }
+
+    // Проверка и восстановление любой сессии (гость или пользователь)
+    public void checkAndRestoreSession(AuthCallback callback) {
+        Log.d(TAG, "Checking and restoring session");
+
+        if (SharedPrefs.isLoggedIn(context)) {
+            // Уже есть какая-то сессия
+            if (SharedPrefs.isGuest(context)) {
+                // Это гостевая сессия
+                restoreGuestSession(callback);
+            } else {
+                // Это сессия зарегистрированного пользователя
+                User user = SharedPrefs.getCurrentUser(context);
+                if (user != null) {
+                    AuthResponse response = new AuthResponse();
+                    response.setSuccess(true);
+                    response.setUser(user);
+                    response.setMessage("Добро пожаловать обратно!");
+                    callback.onSuccess(response);
+                } else {
+                    callback.onError("Ошибка восстановления сессии");
+                }
+            }
+        } else {
+            // Нет активной сессии
+            callback.onError("Требуется авторизация");
+        }
+    }
+
+    // Генерация уникального гостевого ID
+    private int generateGuestId() {
+        // Генерируем отрицательное число в широком диапазоне
+        return GUEST_ID_START - random.nextInt(1000000);
+    }
+
+    // Генерация имени гостя
+    private String generateGuestName() {
+        String[] adjectives = {"Весёлый", "Серьёзный", "Умный", "Быстрый", "Спокойный",
+                "Смелый", "Добрый", "Любознательный", "Терпеливый", "Оптимистичный"};
+        String[] nouns = {"Искатель", "Путешественник", "Исследователь", "Мечтатель", "Творец",
+                "Наблюдатель", "Строитель", "Мыслитель", "Помощник", "Ученик"};
+
+        String adjective = adjectives[random.nextInt(adjectives.length)];
+        String noun = nouns[random.nextInt(nouns.length)];
+
+        return adjective + " " + noun;
+    }
+
+    // Создание объекта гостя
+    private User createGuestUser(int guestId, String guestName) {
+        User guestUser = new User();
+        guestUser.setIdusers(guestId);
+        guestUser.setName(guestName);
+        guestUser.setEmail("guest_" + Math.abs(guestId) + "@guest.local");
+        guestUser.setCoins(0);
+        guestUser.setActive(true);
+        guestUser.setGuest(true);
+
+        return guestUser;
+    }
+
+    // Загрузка задач гостя
+    private void loadGuestTasks(int guestId, User guestUser, AuthCallback callback) {
+        // Проверяем, есть ли локальные задачи для этого гостя
+        taskSyncManager.checkGuestTasks(guestId, new TaskSyncManager.ServerCheckCallback() {
+            @Override
+            public void onCheckComplete(boolean hasTasks) {
+                Log.d(TAG, "Guest has tasks: " + hasTasks);
+
+                // Создаем ответ об успешной авторизации
+                AuthResponse response = new AuthResponse();
+                response.setSuccess(true);
+                response.setUser(guestUser);
+                response.setMessage("Добро пожаловать, " + guestUser.getName() + "!");
+
+                if (hasTasks) {
+                    response.setMessage("Добро пожаловать, " + guestUser.getName() + "! Ваши задачи загружены.");
+                }
+
+                callback.onSuccess(response);
+            }
+
+            @Override
+            public void onCheckError(String error) {
+                Log.e(TAG, "Error checking guest tasks: " + error);
+
+                // Все равно считаем авторизацию успешной
+                AuthResponse response = new AuthResponse();
+                response.setSuccess(true);
+                response.setUser(guestUser);
+                response.setMessage("Добро пожаловать, " + guestUser.getName() + "!");
+
+                callback.onSuccess(response);
+            }
+        });
+    }
+
+    // Проверка, является ли ID гостевым
+    public boolean isGuestId(int userId) {
+        return userId < 0;
+    }
+
+    // Проверка, является ли текущий пользователь гостем
+    public boolean isCurrentUserGuest() {
+        User user = getCurrentUser();
+        return user != null && isGuestId(user.getIdusers());
+    }
+
+    // Миграция гостя в зарегистрированного пользователя
+//    public void migrateGuestToUser(int oldGuestId, User newUser, AuthCallback callback) {
+//        Log.d(TAG, "Migrating guest " + oldGuestId + " to user " + newUser.getIdusers());
+//
+//        // 1. Переносим задачи гостя в новый аккаунт
+//        migrateGuestTasks(oldGuestId, newUser.getIdusers(), new TaskSyncManager.SyncCallback() {
+//            @Override
+//            public void onSyncComplete(String message, int taskCount) {
+//                Log.d(TAG, "Guest tasks migrated: " + taskCount + " tasks");
+//
+//                // 2. Очищаем гостевую сессию (только сессию, не данные)
+//                logoutGuest();
+//
+//                // 3. Сохраняем новую сессию пользователя
+//                SharedPrefs.saveUserSession(context,
+//                        newUser.getIdusers(),
+//                        newUser.getEmail(),
+//                        newUser.getName()
+//                );
+//
+//                // 4. Отправляем успешный ответ
+//                AuthResponse response = new AuthResponse();
+//                response.setSuccess(true);
+//                response.setUser(newUser);
+//                response.setMessage(message);
+//                response.setTaskCount(taskCount);
+//
+//                callback.onSuccess(response);
+//            }
+//
+//            @Override
+//            public void onSyncError(String error) {
+//                Log.e(TAG, "Error migrating guest tasks: " + error);
+//
+//                // Даже если миграция не удалась, сохраняем пользователя
+//                SharedPrefs.saveUserSession(context,
+//                        newUser.getIdusers(),
+//                        newUser.getEmail(),
+//                        newUser.getName()
+//                );
+//
+//                AuthResponse response = new AuthResponse();
+//                response.setSuccess(true);
+//                response.setUser(newUser);
+//                response.setMessage("Регистрация успешна. Ошибка при переносе задач: " + error);
+//
+//                callback.onSuccess(response);
+//            }
+//        });
+//    }
+
+//    private void migrateGuestTasks(int oldGuestId, int newUserId, TaskSyncManager.SyncCallback callback) {
+//        // Реализация переноса задач из гостевого аккаунта в новый
+//        taskSyncManager.migrateGuestTasks(oldGuestId, newUserId, callback);
+//    }
+
+    // Выход для гостя (сохраняет данные для будущего восстановления)
+    public void logoutGuest() {
+        Log.d(TAG, "Logging out guest (preserving data)");
+        SharedPrefs.logoutGuest(context);
+    }
+
+    // Полная очистка гостевых данных (по желанию пользователя)
+    public void clearAllGuestData() {
+        if (isCurrentUserGuest()) {
+            User guest = getCurrentUser();
+            if (guest != null) {
+                int guestId = guest.getIdusers();
+                Log.d(TAG, "Clearing all data for guest ID: " + guestId);
+                SharedPrefs.clearAllGuestData(context);
+            }
+        }
+    }
+
+    // ========== СУЩЕСТВУЮЩИЙ ФУНКЦИОНАЛ ДЛЯ ЗАРЕГИСТРИРОВАННЫХ ПОЛЬЗОВАТЕЛЕЙ ==========
 
     // Регистрация пользователя через API
     public void registerUser(String name, String email, String password, AuthCallback callback) {
+        Log.d(TAG, "Starting user registration: " + email);
+
         // 1. Проверка валидности данных
         if (!ValidationUtils.isValidEmail(email)) {
             callback.onError("Неверный формат email");
@@ -55,7 +292,7 @@ public class AuthManager {
                     if (apiResponse.isSuccess()) {
                         Log.d(TAG, "Registration successful. User ID: " + apiResponse.getUserId());
 
-                        // 4. Сохранение сессии (используем метод saveUserSession)
+                        // 4. Сохранение сессии
                         SharedPrefs.saveUserSession(context, apiResponse.getUserId(), email, name);
 
                         // 5. Проверка и загрузка задач из файла
@@ -86,6 +323,8 @@ public class AuthManager {
 
     // Авторизация пользователя через API
     public void loginUser(String email, String password, AuthCallback callback) {
+        Log.d(TAG, "Starting user login: " + email);
+
         // 1. Проверка введенных данных
         if (email.isEmpty() || password.isEmpty()) {
             callback.onError("Заполните все поля");
@@ -263,22 +502,38 @@ public class AuthManager {
         callback.onSuccess(response);
     }
 
-    // Выход из системы
+    // ========== ОБЩИЕ МЕТОДЫ ==========
+
+    // Выход из системы (для всех типов пользователей)
     public void logout() {
-        SharedPrefs.clearUserSession(context);
+        if (isCurrentUserGuest()) {
+            logoutGuest(); // Для гостя - сохраняем данные
+        } else {
+            SharedPrefs.clearUserSession(context); // Для пользователя - полная очистка
+        }
+        Log.d(TAG, "User logged out");
     }
 
-    // Проверка авторизации
+    // Проверка авторизации (включая гостей)
     public boolean isLoggedIn() {
         return SharedPrefs.isLoggedIn(context);
     }
 
-    // Получить текущего пользователя
+    // Получить текущего пользователя (работает и для гостя)
     public User getCurrentUser() {
         if (isLoggedIn()) {
-            return SharedPrefs.getCurrentUser(context);
+            User user = SharedPrefs.getCurrentUser(context);
+            if (user != null && isGuestId(user.getIdusers())) {
+                user.setGuest(true);
+            }
+            return user;
         }
         return null;
+    }
+
+    // Проверить, есть ли сохраненный гость (для показа кнопки восстановления)
+    public boolean hasSavedGuest() {
+        return SharedPrefs.getGuestId(context) != -1;
     }
 
     // Интерфейс обратного вызова

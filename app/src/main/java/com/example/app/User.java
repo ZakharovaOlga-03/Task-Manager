@@ -33,6 +33,9 @@ public class User {
     @SerializedName("is_active")
     private boolean is_active;
 
+    // Новое поле для гостей
+    private boolean isGuest;
+
     // Для регистрации
     public User(String name, String email, String password) {
         this.name = name;
@@ -40,10 +43,23 @@ public class User {
         this.password = password;
         this.coins = 0;
         this.is_active = true;
+        this.isGuest = false;
     }
 
-    // Пустой конструктор для Gson
-    public User() {}
+    // Конструктор для гостя
+    public User(int idusers, String name) {
+        this.idusers = idusers;
+        this.name = name;
+        this.email = "guest_" + Math.abs(idusers) + "@guest.local";
+        this.coins = 0;
+        this.is_active = true;
+        this.isGuest = true;
+    }
+
+    // Пустой конструктор
+    public User() {
+        this.isGuest = false;
+    }
 
     // Геттеры и сеттеры
     public int getIdusers() { return idusers; }
@@ -76,13 +92,24 @@ public class User {
     public boolean isActive() { return is_active; }
     public void setActive(boolean active) { is_active = active; }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "idusers=" + idusers +
-                ", name='" + name + '\'' +
-                ", email='" + email + '\'' +
-                ", coins=" + coins +
-                '}';
+    // Гостевые методы
+    public boolean isGuest() { return isGuest; }
+    public void setGuest(boolean guest) { isGuest = guest; }
+
+    // Вспомогательные методы
+    public boolean isGuestUser() {
+        return isGuest || idusers < 0;
+    }
+
+    // Получить отображаемое имя
+    public String getDisplayName() {
+        if (isGuest && name != null && !name.isEmpty()) {
+            return name;
+        } else if (name != null && !name.isEmpty()) {
+            return name;
+        } else if (email != null && !email.isEmpty()) {
+            return email.split("@")[0];
+        }
+        return "Пользователь";
     }
 }

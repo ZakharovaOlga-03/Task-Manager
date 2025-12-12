@@ -2,6 +2,7 @@ package com.example.app;
 
 import android.content.Context;
 import android.util.Log;
+
 import com.example.app.ApiResponse;
 import com.example.app.ApiService;
 import com.example.app.RetrofitClient;
@@ -386,6 +387,59 @@ public class TaskSyncManager {
     public interface ServerCheckCallback {
         void onCheckComplete(boolean hasTasks);
         void onCheckError(String error);
+    }
+
+    public void checkGuestTasks(int guestId, ServerCheckCallback callback) {
+        Log.d(TAG, "Checking tasks for guest: " + guestId);
+
+        // Для гостей проверяем только локальное хранилище
+        boolean hasTasks = hasGuestTasksInStorage(guestId);
+
+        if (hasTasks) {
+            callback.onCheckComplete(true);
+        } else {
+            callback.onCheckComplete(false);
+        }
+    }
+
+    private boolean hasGuestTasksInStorage(int guestId) {
+        // Проверяем локальную БД или файл на наличие задач гостя
+        try {
+            // Здесь логика проверки локального хранилища
+            // Например, проверка файла tasks_guest_[id].json
+            return false; // Пока возвращаем false
+        } catch (Exception e) {
+            Log.e(TAG, "Error checking guest tasks: " + e.getMessage());
+            return false;
+        }
+    }
+
+    // Загрузить задачи гостя
+    public List<Task> loadGuestTasks(int guestId) {
+        List<Task> tasks = new ArrayList<>();
+        Log.d(TAG, "Loading tasks for guest: " + guestId);
+
+        try {
+            // Логика загрузки из локального хранилища
+            // Например, из файла или локальной БД
+            return tasks;
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading guest tasks: " + e.getMessage());
+            return tasks;
+        }
+    }
+
+    // Сохранить задачи гостя
+    public boolean saveGuestTasks(int guestId, List<Task> tasks) {
+        Log.d(TAG, "Saving " + tasks.size() + " tasks for guest: " + guestId);
+
+        try {
+            // Логика сохранения в локальное хранилище
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Error saving guest tasks: " + e.getMessage());
+            return false;
+        }
     }
 
     // Интерфейс обратного вызова

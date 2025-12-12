@@ -10,6 +10,7 @@ public class Task {
     private String duration;
     private String status;
     private boolean is_completed;
+    private boolean isCompletedFromDB;
 
     // Поля для удобства (могут дублировать API поля)
     private int id; // Для внутреннего использования
@@ -51,11 +52,6 @@ public class Task {
     @SerializedName("task_creation_date")
     private String taskCreationDate;
 
-    // УДАЛИТЕ ЭТО ПОЛЕ - оно конфликтует с is_completed
-    // @SerializedName("is_completed")
-    // private boolean dbCompleted;
-
-    // Вместо этого добавьте поле для статуса из БД
     @SerializedName("task_status")
     private String taskStatus;
 
@@ -210,5 +206,11 @@ public class Task {
                 ", is_completed=" + is_completed +
                 ", taskCompletionDate='" + taskCompletionDate + '\'' +
                 '}';
+    }
+
+    public boolean isTaskCompleted() {
+        return is_completed() || isCompletedFromDB ||
+                "выполнено".equals(get_status()) ||
+                "completed".equals(get_status());
     }
 }

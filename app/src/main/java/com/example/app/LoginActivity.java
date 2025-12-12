@@ -13,6 +13,7 @@ public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private EditText etEmail, etPassword;
     private Button btnLogin;
+    private TextView tvNoRegister;
     private TextView tvRegister;
 
     private AuthManager authManager;
@@ -25,12 +26,6 @@ public class LoginActivity extends AppCompatActivity {
         Log.d(TAG, "LoginActivity started");
 
         authManager = new AuthManager(this);
-        // Проверить, не авторизован ли уже пользователь
-        //if (authManager.isLoggedIn()) {
-        //    Log.d(TAG, "User already logged in, redirecting to MainActivity");
-        //    startMainActivity();
-        //    return;
-        //}
 
         initViews();
         setupListeners();
@@ -40,11 +35,15 @@ public class LoginActivity extends AppCompatActivity {
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         btnLogin = findViewById(R.id.btnLogin);
+        tvNoRegister = findViewById(R.id.tvNoRegister);
         tvRegister = findViewById(R.id.tvRegister);
     }
 
     private void setupListeners() {
         btnLogin.setOnClickListener(v -> loginUser());
+        tvNoRegister.setOnClickListener(v -> {
+            restoreGuestSession();
+        });
 
         tvRegister.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, RegistrationActivity.class);
@@ -91,6 +90,36 @@ public class LoginActivity extends AppCompatActivity {
 
                     Toast.makeText(LoginActivity.this, error, Toast.LENGTH_LONG).show();
                 });
+            }
+        });
+    }
+
+    private void restoreGuestSession() {
+        authManager.restoreGuestSession(new AuthManager.AuthCallback() {
+            @Override
+            public void onSuccess(AuthResponse response) {
+                startMainActivity();
+            }
+
+            @Override
+            public void onError(String error) {
+                loginAsNewGuest();
+                Toast.makeText(LoginActivity.this,
+                        "Ошибка восстановления: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private void loginAsNewGuest() {
+        authManager.loginAsGuest(new AuthManager.AuthCallback() {
+            @Override
+            public void onSuccess(AuthResponse response) {
+                startMainActivity();
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(LoginActivity.this, error, Toast.LENGTH_SHORT).show();
             }
         });
     }

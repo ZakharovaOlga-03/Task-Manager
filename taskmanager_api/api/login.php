@@ -27,6 +27,7 @@ if (!empty($data->email) && !empty($data->password)) {
             // Возвращаем данные пользователя (без пароля)
             $user_data = array(
                 "user_id" => $row['idusers'],
+                "idusers" => $row['idusers'],
                 "name" => $row['name'],
                 "email" => $row['email'],
                 "coins" => $row['coins'],

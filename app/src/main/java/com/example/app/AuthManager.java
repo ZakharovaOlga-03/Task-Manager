@@ -138,6 +138,14 @@ public class AuthManager {
 
     // Метод для сохранения пользователя в SharedPrefs
     private void saveUserToSharedPrefs(User user) {
+        Log.d(TAG, "Saving user to SharedPrefs: ID=" + user.getIdusers() +
+                ", Name=" + user.getName() +
+                ", Email=" + user.getEmail());
+
+        if (user.getIdusers() <= 0) {
+            Log.e(TAG, "Invalid user ID: " + user.getIdusers());
+        }
+
         SharedPrefs.saveUserSession(
                 context,
                 user.getIdusers(),
@@ -145,8 +153,9 @@ public class AuthManager {
                 user.getName()
         );
 
-        // Если нужно сохранить больше данных, можно создать отдельный метод
-        // Например: saveUserDetails(user);
+        // Проверим сразу после сохранения
+        int savedId = SharedPrefs.getUserId(context);
+        Log.d(TAG, "Saved user ID in SharedPrefs: " + savedId);
     }
 
     // Проверка и синхронизация задач после авторизации

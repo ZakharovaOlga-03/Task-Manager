@@ -51,6 +51,17 @@ public class Task {
     @SerializedName("task_creation_date")
     private String taskCreationDate;
 
+    // УДАЛИТЕ ЭТО ПОЛЕ - оно конфликтует с is_completed
+    // @SerializedName("is_completed")
+    // private boolean dbCompleted;
+
+    // Вместо этого добавьте поле для статуса из БД
+    @SerializedName("task_status")
+    private String taskStatus;
+
+    @SerializedName("completed_date")
+    private String taskCompletionDate;
+
     // Конструктор для отображения
     public Task(String time, String icon_name, String title, String duration, String status, boolean is_completed) {
         this.time = time;
@@ -104,6 +115,8 @@ public class Task {
     public String getTaskNote() { return taskNote; }
     public int getTaskReward() { return taskReward; }
     public String getTaskCreationDate() { return taskCreationDate; }
+    public String getTaskStatus() { return taskStatus; }
+    public String getTaskCompletionDate() { return taskCompletionDate; }
 
     // ========== СЕТТЕРЫ ДЛЯ API ==========
     public void setIdTask(int idTask) {
@@ -122,6 +135,8 @@ public class Task {
     public void setTaskNote(String taskNote) { this.taskNote = taskNote; }
     public void setTaskReward(int taskReward) { this.taskReward = taskReward; }
     public void setTaskCreationDate(String taskCreationDate) { this.taskCreationDate = taskCreationDate; }
+    public void setTaskStatus(String taskStatus) { this.taskStatus = taskStatus; }
+    public void setTaskCompletionDate(String taskCompletionDate) { this.taskCompletionDate = taskCompletionDate; }
 
     // ========== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==========
 
@@ -166,5 +181,34 @@ public class Task {
     // Проверить, есть ли у задачи ID
     public boolean hasId() {
         return id != 0 || idTask != 0;
+    }
+
+    // Метод для определения, выполнена ли задача по данным из БД
+    public boolean isCompletedFromDB() {
+        // Проверяем поле task_status
+        if (taskStatus != null &&
+                (taskStatus.equals("completed") || taskStatus.equals("выполнено"))) {
+            return true;
+        }
+
+        // Проверяем дату завершения
+        if (taskCompletionDate != null && !taskCompletionDate.isEmpty()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + getId() +
+                ", title='" + get_title() + '\'' +
+                ", taskName='" + taskName + '\'' +
+                ", status='" + get_status() + '\'' +
+                ", taskStatus='" + taskStatus + '\'' +
+                ", is_completed=" + is_completed +
+                ", taskCompletionDate='" + taskCompletionDate + '\'' +
+                '}';
     }
 }

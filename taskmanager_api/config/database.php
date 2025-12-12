@@ -1,9 +1,9 @@
 <?php
 class Database {
     private $host = "localhost";
-    private $db_name = "TaskManager";
-    private $username = "root";
-    private $password = "";
+    private $db_name = "taskmanager"; // ваша база данных
+    private $username = "root";       // по умолчанию для XAMPP
+    private $password = "";           // по умолчанию для XAMPP пустой пароль
     public $conn;
 
     public function getConnection() {
@@ -14,12 +14,17 @@ class Database {
                 $this->username,
                 $this->password
             );
+            
+            // Включите режим ошибок
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+            
+            error_log("Database connection successful to $this->db_name");
         } catch(PDOException $exception) {
-            echo json_encode(["error" => "Connection error: " . $exception->getMessage()]);
-            exit();
+            error_log("Connection error: " . $exception->getMessage());
+            error_log("Tried to connect to: host=$this->host, db=$this->db_name, user=$this->username");
+            throw $exception;
         }
         return $this->conn;
     }
 }
-// НЕ нужно закрывающего ?>

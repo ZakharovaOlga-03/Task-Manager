@@ -21,6 +21,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.example.app.data.local.AppDatabase;
+import com.example.app.data.local.dao.TaskDao;
 import com.example.app.data.local.entities.TaskEntity;
 import com.example.app.data.repository.TaskRepository;
 import com.example.app.utils.NetworkUtils;
@@ -203,11 +204,11 @@ public class AddTaskActivity extends AppCompatActivity {
         reminder_adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinner_reminder.setAdapter(reminder_adapter);
 
-        // Статусы задач (новый спиннер)
-        ArrayAdapter<String> status_adapter = new ArrayAdapter<>(this,
-                R.layout.spinner_item, STATUSES);
-        status_adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-        spinner_status.setAdapter(status_adapter);
+//        // Статусы задач (новый спиннер)
+//        ArrayAdapter<String> status_adapter = new ArrayAdapter<>(this,
+//                R.layout.spinner_item, STATUSES);
+//        status_adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+//        spinner_status.setAdapter(status_adapter);
 
         // Приоритеты (новый спиннер)
         ArrayAdapter<String> priority_adapter = new ArrayAdapter<>(this,
@@ -216,7 +217,7 @@ public class AddTaskActivity extends AppCompatActivity {
         spinner_priority.setAdapter(priority_adapter);
 
         // Установить значения по умолчанию
-        spinner_status.setSelection(0); // "pending"
+//        spinner_status.setSelection(0); // "pending"
         spinner_priority.setSelection(2); // "3 (Средний)"
     }
 
@@ -349,11 +350,14 @@ public class AddTaskActivity extends AppCompatActivity {
         task.setTaskCreationDate(new Date());
         task.setUpdatedAt(new Date());
 
-        // Установить sync_status в зависимости от наличия сети
-        if (networkUtils.isNetworkAvailable()) {
-            task.setSyncStatus("pending"); // Будет отправлено на сервер
-        } else {
-            task.setSyncStatus("offline"); // Только локальное сохранение
+        if (currentUserId < 0) { // Гостевая задача
+            task.setSyncStatus("offline"); // Явно помечаем как оффлайн
+        } else{
+            if (networkUtils.isNetworkAvailable()) {
+                task.setSyncStatus("pending"); // Будет отправлено на сервер
+            } else {
+                task.setSyncStatus("offline"); // Только локальное сохранение
+            }
         }
 
         // Установить completedAt если задача создается выполненной
@@ -365,44 +369,54 @@ public class AddTaskActivity extends AppCompatActivity {
     }
 
     private void saveTaskToLocalDatabase(TaskEntity task) {
-        taskRepository.createTask(task, new TaskRepository.TaskCallback() {
-            @Override
-            public void onSuccess(TaskEntity savedTask) {
+        new Thread(() -> {
+            try {
+                // Получаем доступ к БД напрямую
+                AppDatabase database = AppDatabase.getInstance(AddTaskActivity.this);
+                TaskDao taskDao = database.taskDao();
+
+                // Сохраняем задачу в Room
+                long localId = taskDao.insertTask(task);
+                task.setLocalId((int) localId);
+
                 runOnUiThread(() -> {
                     btn_create_task.setEnabled(true);
                     btn_create_task.setText("Создать задачу");
 
-                    // Проверить наличие сети для отправки на сервер
                     if (networkUtils.isNetworkAvailable()) {
-                        // Отправить задачу на сервер в фоне
-                        sendTaskToServer(savedTask);
-                        Toast.makeText(AddTaskActivity.this,
-                                "Задача создана и отправлена на сервер",
-                                Toast.LENGTH_SHORT).show();
+                        // Только если это НЕ гостевая задача
+                        if (currentUserId > 0) { // Положительный ID = зарегистрированный пользователь
+                            sendTaskToServer(task);
+                            Toast.makeText(AddTaskActivity.this,
+                                    "Задача создана и отправлена на сервер",
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(AddTaskActivity.this,
+                                    "Задача сохранена локально (гостевой режим)",
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     } else {
                         Toast.makeText(AddTaskActivity.this,
                                 "Задача сохранена локально. Синхронизируется при подключении",
                                 Toast.LENGTH_LONG).show();
                     }
 
-                    // Отправить результат обратно в MainActivity
                     setResult(RESULT_OK);
                     finish();
                 });
-            }
 
-            @Override
-            public void onError(String error) {
+            } catch (Exception e) {
                 runOnUiThread(() -> {
                     btn_create_task.setEnabled(true);
                     btn_create_task.setText("Создать задачу");
 
                     Toast.makeText(AddTaskActivity.this,
-                            "Ошибка сохранения задачи: " + error,
+                            "Ошибка сохранения задачи: " + e.getMessage(),
                             Toast.LENGTH_LONG).show();
+                    Log.e("AddTaskActivity", "Error saving task: " + e.getMessage(), e);
                 });
             }
-        });
+        }).start();
     }
 
     private void sendTaskToServer(TaskEntity task) {

@@ -92,4 +92,7 @@ public interface TaskDao {
 
     @Query("UPDATE tasks SET server_id = :serverId, sync_status = 'synced', last_sync_date = :syncDate WHERE local_id = :localId")
     void markAsSynced(int localId, int serverId, Date syncDate);
+
+    @Query("SELECT * FROM tasks WHERE user_id = :userId AND date(task_goal_date) = date(:date) AND is_deleted = 0")
+    List<TaskEntity> getTasksForDateSync(int userId, Date date);
 }

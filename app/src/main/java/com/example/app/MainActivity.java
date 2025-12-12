@@ -1,5 +1,6 @@
 package com.example.app;
 
+import android.app.ComponentCaller;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,15 +13,23 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.app.ApiService;
 import com.example.app.RetrofitClient;
 import com.example.app.TasksResponse;
 import com.example.app.SharedPrefs;
+import com.example.app.data.local.AppDatabase;
+import com.example.app.data.local.dao.TaskDao;
+import com.example.app.data.local.entities.TaskEntity;
 import com.example.app.utils.NetworkUtils;
 
 import java.text.ParseException;
@@ -79,6 +88,8 @@ public class MainActivity extends AppCompatActivity {
 
         authManager = new AuthManager(this);
         apiService = RetrofitClient.getApiService();
+
+        networkUtils = new NetworkUtils(this); // Инициализируем NetworkUtils
 
         currentCalendar = Calendar.getInstance();
 
@@ -387,61 +398,7 @@ public class MainActivity extends AppCompatActivity {
         load_tasks_for_selected_day();
     }
 
-    private void load_tasks_for_selected_day() {
-        int userId = SharedPrefs.getUserId(this);
-        if (userId == -1) {
-            show_no_tasks_message();
-            return;
-        }
 
-        // Получаем дату выбранного дня
-        Calendar selectedDate = weekDays[selectedDayPosition];
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        String selectedDateStr = dateFormat.format(selectedDate.getTime());
-
-        Log.d(TAG, "Loading tasks for date: " + selectedDateStr);
-
-        // Показываем индикатор загрузки
-        tv_no_tasks.setVisibility(View.GONE);
-
-        Call<TasksResponse> call = apiService.getTasks(userId);
-        call.enqueue(new Callback<TasksResponse>() {
-            @Override
-            public void onResponse(Call<TasksResponse> call, Response<TasksResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    TasksResponse tasksResponse = response.body();
-
-                    if (tasksResponse.isSuccess() && tasksResponse.getTasks() != null) {
-                        List<Task> allTasks = tasksResponse.getTasks();
-
-                        // Фильтруем задачи для выбранной даты
-                        List<Task> filteredTasks = filterTasksForDate(allTasks, selectedDateStr);
-
-                        runOnUiThread(() -> {
-                            if (filteredTasks.isEmpty()) {
-                                show_no_tasks_message();
-                            } else {
-                                setup_tasks_from_api(filteredTasks);
-                            }
-                        });
-                    } else {
-                        runOnUiThread(() -> show_no_tasks_message());
-                    }
-                } else {
-                    runOnUiThread(() -> show_no_tasks_message());
-                }
-            }
-
-            @Override
-            public void onFailure(Call<TasksResponse> call, Throwable t) {
-                runOnUiThread(() -> {
-                    Toast.makeText(MainActivity.this,
-                            "Ошибка загрузки задач", Toast.LENGTH_SHORT).show();
-                    show_no_tasks_message();
-                });
-            }
-        });
-    }
 
     private List<Task> filterTasksForDate(List<Task> allTasks, String targetDate) {
         List<Task> filteredTasks = new ArrayList<>();
@@ -786,8 +743,14 @@ public class MainActivity extends AppCompatActivity {
             load_tasks_for_selected_day();
 
             // Если есть интернет, запустить фоновую синхронизацию
-            if (networkUtils.isNetworkAvailable()) {
+            if (networkUtils != null && networkUtils.isNetworkAvailable()) {
                 startSyncService();
+            } else {
+                // Если networkUtils null, инициализируем его
+                networkUtils = new NetworkUtils(this);
+                if (networkUtils.isNetworkAvailable()) {
+                    startSyncService();
+                }
             }
         }
     }
@@ -802,5 +765,226 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data, @NonNull ComponentCaller caller) {
+        super.onActivityResult(requestCode, resultCode, data, caller);
+    }
+
+    private List<Task> convertTaskEntitiesToTasks(List<TaskEntity> taskEntities) {
+        List<Task> tasks = new ArrayList<>();
+
+        for (TaskEntity entity : taskEntities) {
+            Task task = new Task();
+
+            // Заполняем поля для отображения
+            task.setIdTask(entity.getLocalId()); // Используем локальный ID
+            task.setUserId(entity.getUserId());
+            task.setTaskName(entity.getTaskName());
+            task.setTaskType(entity.getTaskType());
+            task.setTaskGoalDate(dateToString(entity.getTaskGoalDate()));
+            task.setNotifyStart(dateToString(entity.getNotifyStart()));
+            task.setTaskNote(entity.getTaskNote());
+            task.setTaskReward(entity.getTaskReward());
+            task.setTaskStatus(entity.getStatus());
+
+            // Для отображения в UI
+            task.set_time(formatTimeRange(entity.getNotifyStart(), entity.getTaskGoalDate()));
+            task.set_title(entity.getTaskName());
+            task.set_status(entity.getStatus());
+            task.set_completed("completed".equals(entity.getStatus()));
+            task.set_icon_name(getIconNameForTaskType(entity.getTaskType()));
+            task.set_duration(calculateDuration(entity.getNotifyStart(), entity.getTaskGoalDate()));
+
+            tasks.add(task);
+        }
+
+        return tasks;
+    }
+
+    private void load_tasks_for_selected_day() {
+        int userId = SharedPrefs.getUserId(this);
+        if (userId == -1) {
+            show_no_tasks_message();
+            return;
+        }
+
+        // Получаем дату выбранного дня
+        Calendar selectedDate = weekDays[selectedDayPosition];
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String selectedDateStr = dateFormat.format(selectedDate.getTime());
+
+        Log.d(TAG, "Loading tasks for date: " + selectedDateStr + " from LOCAL DB");
+        tv_no_tasks.setVisibility(View.GONE);
+
+        try {
+            // Парсим дату
+            Date targetDate = dateFormat.parse(selectedDateStr);
+
+            // Получаем LiveData из Room (на главном потоке)
+            AppDatabase database = AppDatabase.getInstance(MainActivity.this);
+            LiveData<List<TaskEntity>> liveData = database.taskDao().getTasksForDate(userId, targetDate);
+
+            // Подписываемся на изменения LiveData
+            liveData.observe(this, new Observer<List<TaskEntity>>() {
+                @Override
+                public void onChanged(List<TaskEntity> taskEntities) {
+                    if (taskEntities != null && !taskEntities.isEmpty()) {
+                        // Конвертируем TaskEntity в Task
+                        List<Task> displayTasks = new ArrayList<>();
+                        for (TaskEntity entity : taskEntities) {
+                            Task task = convertTaskEntityToDisplayTask(entity);
+                            if (task != null) {
+                                displayTasks.add(task);
+                            }
+                        }
+
+                        if (displayTasks.isEmpty()) {
+                            show_no_tasks_message();
+                        } else {
+                            setup_tasks_list(displayTasks);
+                        }
+                    } else {
+                        show_no_tasks_message();
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error loading tasks from local DB: " + e.getMessage());
+            show_no_tasks_message();
+        }
+    }
+
+    private String dateToString(Date date) {
+        if (date == null) return "";
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        return format.format(date);
+    }
+
+    private String formatTimeRange(Date start, Date end) {
+        try {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            String startTime = start != null ? timeFormat.format(start) : "--:--";
+            String endTime = end != null ? timeFormat.format(end) : "--:--";
+            return startTime + " - " + endTime;
+        } catch (Exception e) {
+            return "--:-- - --:--";
+        }
+    }
+
+    private String calculateDuration(Date start, Date end) {
+        if (start == null || end == null) return "";
+
+        long diffMillis = end.getTime() - start.getTime();
+        long diffMinutes = diffMillis / (1000 * 60);
+
+        if (diffMinutes < 60) {
+            return diffMinutes + " минут";
+        } else {
+            long hours = diffMinutes / 60;
+            long minutes = diffMinutes % 60;
+            if (minutes == 0) {
+                return hours + " час" + (hours > 1 ? "а" : "");
+            } else {
+                return hours + " час" + (hours > 1 ? "а" : "") + " " + minutes + " минут";
+            }
+        }
+    }
+
+    private Task convertTaskEntityToDisplayTask(TaskEntity entity) {
+        try {
+            Task task = new Task();
+
+            // Основные поля из TaskEntity
+            task.setIdTask(entity.getLocalId()); // Используем локальный ID
+            task.setUserId(entity.getUserId());
+            task.setTaskName(entity.getTaskName());
+            task.setTaskType(entity.getTaskType());
+            task.setTaskStatus(entity.getStatus());
+
+            // Конвертируем Date в String для API формата
+            SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            if (entity.getTaskGoalDate() != null) {
+                task.setTaskGoalDate(dbFormat.format(entity.getTaskGoalDate()));
+            }
+            if (entity.getNotifyStart() != null) {
+                task.setNotifyStart(dbFormat.format(entity.getNotifyStart()));
+            }
+
+            task.setTaskNote(entity.getTaskNote());
+            task.setTaskReward(entity.getTaskReward());
+
+            // Поля для отображения в UI
+            task.set_time(formatTimeRangeForDisplay(entity.getNotifyStart(), entity.getTaskGoalDate()));
+            task.set_title(entity.getTaskName() != null ? entity.getTaskName() : "Новая задача");
+            task.set_status(entity.getStatus() != null ? entity.getStatus() : "pending");
+            task.set_completed("completed".equals(entity.getStatus()));
+            task.set_icon_name(getIconNameForTaskType(entity.getTaskType()));
+            task.set_duration(calculateDurationForDisplay(entity.getNotifyStart(), entity.getTaskGoalDate()));
+
+            return task;
+
+        } catch (Exception e) {
+            Log.e(TAG, "Error converting TaskEntity: " + e.getMessage(), e);
+            return null;
+        }
+    }
+
+    private String formatTimeRangeForDisplay(Date startDate, Date endDate) {
+        try {
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+            String startTime = startDate != null ? timeFormat.format(startDate) : "--:--";
+            String endTime = endDate != null ? timeFormat.format(endDate) : "--:--";
+            return startTime + " - " + endTime;
+        } catch (Exception e) {
+            return "--:-- - --:--";
+        }
+    }
+
+    private String calculateDurationForDisplay(Date startDate, Date endDate) {
+        if (startDate == null || endDate == null) {
+            return "";
+        }
+
+        try {
+            long diffMillis = endDate.getTime() - startDate.getTime();
+            long diffMinutes = diffMillis / (1000 * 60);
+
+            if (diffMinutes < 60) {
+                return diffMinutes + " минут";
+            } else {
+                long hours = diffMinutes / 60;
+                long minutes = diffMinutes % 60;
+
+                if (minutes == 0) {
+                    return hours + " час" + (hours > 1 ? "а" : "");
+                } else {
+                    return hours + " час" + (hours > 1 ? "а" : "") + " " + minutes + " минут";
+                }
+            }
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private void setup_tasks_list(List<Task> tasks) {
+        if (tasks == null || tasks.isEmpty()) {
+            show_no_tasks_message();
+            return;
+        }
+
+        task_list = tasks;
+        Log.d(TAG, "Setting up " + task_list.size() + " tasks in UI");
+
+        if (task_adapter == null) {
+            task_adapter = new TaskAdapter(task_list, this);
+            rv_tasks.setAdapter(task_adapter);
+        } else {
+            task_adapter.updateTasks(task_list);
+        }
+
+        rv_tasks.setVisibility(View.VISIBLE);
+        tv_no_tasks.setVisibility(View.GONE);
+    }
 
 }

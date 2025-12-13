@@ -15,19 +15,9 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.app.ApiService;
-import com.example.app.RetrofitClient;
-import com.example.app.TasksResponse;
-import com.example.app.Task;
-import com.example.app.SharedPrefs;
-import com.example.app.data.local.AppDatabase;
-import com.example.app.data.local.dao.TaskDao;
-import com.example.app.data.local.entities.TaskEntity;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -56,7 +46,7 @@ public class CalendarActivity extends AppCompatActivity {
     private ApiService apiService;
     private int currentUserId;
     private Calendar currentCalendar;
-    private int selectedDay; // Будем устанавливать текущий день
+    private int selectedDay;
     private SimpleDateFormat monthYearFormat;
     private SimpleDateFormat dayNameFormat;
 
@@ -84,7 +74,7 @@ public class CalendarActivity extends AppCompatActivity {
         // Инициализация Retrofit
         apiService = RetrofitClient.getApiService();
         currentCalendar = Calendar.getInstance();
-        selectedDay = currentCalendar.get(Calendar.DAY_OF_MONTH); // Устанавливаем текущий день
+        selectedDay = currentCalendar.get(Calendar.DAY_OF_MONTH);
 
         // Инициализация форматов дат
         monthYearFormat = new SimpleDateFormat("MMMM yyyy", new Locale("ru"));
@@ -125,8 +115,6 @@ public class CalendarActivity extends AppCompatActivity {
         rv_calendar = findViewById(R.id.rv_calendar);
         rv_day_tasks = findViewById(R.id.rv_day_tasks);
         tv_selected_date = findViewById(R.id.tv_selected_date);
-
-        // Находим TextView для месяца и года
         tv_month_year = findViewById(R.id.tv_month_year);
 
         GridLayoutManager grid_layout = new GridLayoutManager(this, 7);
@@ -146,14 +134,12 @@ public class CalendarActivity extends AppCompatActivity {
 
         if (menu_btn != null) {
             menu_btn.setOnClickListener(v -> {
-                // Обработка клика на меню
                 Toast.makeText(this, "Меню", Toast.LENGTH_SHORT).show();
             });
         }
 
         if (search_btn != null) {
             search_btn.setOnClickListener(v -> {
-                // Обработка клика на поиск
                 Toast.makeText(this, "Поиск", Toast.LENGTH_SHORT).show();
             });
         }
@@ -265,57 +251,45 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private void load_tasks_for_selected_day() {
-        Log.d(TAG, "Loading tasks for day: " + selectedDay + ", User: " + currentUserId + " from LOCAL DB");
+        Log.d(TAG, "Loading tasks for day: " + selectedDay + ", User: " + currentUserId);
 
-        // Создаем дату для выбранного дня
-        Calendar selectedDate = Calendar.getInstance();
-        selectedDate.set(Calendar.YEAR, currentCalendar.get(Calendar.YEAR));
-        selectedDate.set(Calendar.MONTH, currentCalendar.get(Calendar.MONTH));
-        selectedDate.set(Calendar.DAY_OF_MONTH, selectedDay);
+        // Загружаем все задачи пользователя
+        Call<TasksResponse> call = apiService.getTasks(currentUserId);
+        call.enqueue(new Callback<TasksResponse>() {
+            @Override
+            public void onResponse(Call<TasksResponse> call, Response<TasksResponse> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    TasksResponse tasksResponse = response.body();
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-        final String targetDateStr = dateFormat.format(selectedDate.getTime());
+                    if (tasksResponse.isSuccess() && tasksResponse.getTasks() != null) {
+                        List<Task> allTasks = tasksResponse.getTasks();
+                        Log.d(TAG, "Total tasks loaded: " + allTasks.size());
 
-        // Загружаем на главном потоке через LiveData
-        AppDatabase database = AppDatabase.getInstance(CalendarActivity.this);
-        TaskDao taskDao = database.taskDao();
+                        // Фильтруем задачи по выбранному дню
+                        List<Task> filteredTasks = filterTasksByDay(allTasks, selectedDay);
+                        Log.d(TAG, "Tasks for selected day: " + filteredTasks.size());
 
-        try {
-            // Парсим дату на главном потоке
-            final Date targetDate = dateFormat.parse(targetDateStr);
+                        // Конвертируем задачи для отображения
+                        List<Task> displayTasks = convertTasksForDisplay(filteredTasks);
 
-            // Получаем LiveData и подписываемся на изменения
-            LiveData<List<TaskEntity>> liveData = taskDao.getTasksForDate(currentUserId, targetDate);
-
-            // ОБЯЗАТЕЛЬНО на главном потоке!
-            liveData.observe(this, new Observer<List<TaskEntity>>() {
-                @Override
-                public void onChanged(List<TaskEntity> taskEntities) {
-                    if (taskEntities != null && !taskEntities.isEmpty()) {
-                        // Конвертируем TaskEntity в Task
-                        List<Task> displayTasks = new ArrayList<>();
-                        for (TaskEntity entity : taskEntities) {
-                            Task task = convertTaskEntityToDisplayTask(entity);
-                            if (task != null) {
-                                displayTasks.add(task);
-                            }
-                        }
-
-                        if (displayTasks.isEmpty()) {
-                            show_no_tasks_message();
-                        } else {
-                            update_tasks_list(displayTasks);
-                        }
+                        // Обновляем UI
+                        update_tasks_list(displayTasks);
                     } else {
+                        Log.e(TAG, "API returned error: " + tasksResponse.getMessage());
                         show_no_tasks_message();
                     }
+                } else {
+                    Log.e(TAG, "Failed to load tasks. Code: " + response.code());
+                    show_no_tasks_message();
                 }
-            });
+            }
 
-        } catch (ParseException e) {
-            Log.e(TAG, "Error parsing date: " + e.getMessage(), e);
-            show_no_tasks_message();
-        }
+            @Override
+            public void onFailure(Call<TasksResponse> call, Throwable t) {
+                Log.e(TAG, "Network error loading tasks: " + t.getMessage());
+                show_no_tasks_message();
+            }
+        });
     }
 
     private List<Task> filterTasksByDay(List<Task> allTasks, int day) {
@@ -334,11 +308,15 @@ public class CalendarActivity extends AppCompatActivity {
 
             for (Task task : allTasks) {
                 if (task.getTaskGoalDate() != null && !task.getTaskGoalDate().isEmpty()) {
-                    // Извлекаем дату из поля task_goal_date
-                    String taskDateStr = task.getTaskGoalDate().substring(0, 10);
+                    try {
+                        // Извлекаем дату из поля task_goal_date
+                        String taskDateStr = task.getTaskGoalDate().substring(0, 10);
 
-                    if (taskDateStr.equals(targetDateStr)) {
-                        filteredTasks.add(task);
+                        if (taskDateStr.equals(targetDateStr)) {
+                            filteredTasks.add(task);
+                        }
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error extracting date from task: " + e.getMessage());
                     }
                 }
             }
@@ -364,8 +342,16 @@ public class CalendarActivity extends AppCompatActivity {
 
     private Task convertApiTaskToDisplayTask(Task apiTask) {
         try {
-            // Создаем задачу для отображения с правильным конструктором
+            Log.d(TAG, "Converting task for calendar: ID=" + apiTask.getIdTask() +
+                    ", Name=" + apiTask.getTaskName() +
+                    ", Status=" + apiTask.getTaskStatus() +
+                    ", IsCompleted=" + apiTask.is_completed());
+
             Task displayTask = new Task();
+
+            // Копируем ID из API
+            displayTask.setIdTask(apiTask.getIdTask());
+            displayTask.setId(apiTask.getIdTask());
 
             // 1. Время (формат: "10:00 - 17:00")
             String timeRange = formatTimeRangeFromDatabase(
@@ -392,13 +378,31 @@ public class CalendarActivity extends AppCompatActivity {
             );
             displayTask.set_duration(duration);
 
-            // 5. Статус задачи
-            String status = getTaskStatusForCalendar(apiTask);
+            // 5. Статус задачи - проверяем, выполнена ли задача
+            String status;
+            boolean isTaskCompleted = isTaskCompleted(apiTask);
+
+            if (isTaskCompleted) {
+                status = "выполнено";
+            } else {
+                status = getTaskStatusForCalendar(apiTask);
+            }
             displayTask.set_status(status);
 
             // 6. Завершена ли задача
-            boolean isCompleted = false; // По умолчанию
-            displayTask.set_completed(isCompleted);
+            displayTask.set_completed(isTaskCompleted);
+
+            // Копируем другие поля из API
+            displayTask.setTaskName(apiTask.getTaskName());
+            displayTask.setTaskType(apiTask.getTaskType());
+            displayTask.setTaskGoalDate(apiTask.getTaskGoalDate());
+            displayTask.setNotifyStart(apiTask.getNotifyStart());
+            displayTask.setTaskStatus(apiTask.getTaskStatus());
+            displayTask.setTaskCompletionDate(apiTask.getTaskCompletionDate());
+
+            Log.d(TAG, "Converted for calendar: Title=" + displayTask.get_title() +
+                    ", Status=" + displayTask.get_status() +
+                    ", Completed=" + displayTask.is_completed());
 
             return displayTask;
 
@@ -406,6 +410,39 @@ public class CalendarActivity extends AppCompatActivity {
             Log.e(TAG, "Error converting task for calendar: " + e.getMessage(), e);
             return null;
         }
+    }
+
+    private boolean isTaskCompleted(Task apiTask) {
+        // 1. Проверяем локальное поле
+        if (apiTask.is_completed()) {
+            return true;
+        }
+
+        // 2. Проверяем статус из БД
+        if (apiTask.getTaskStatus() != null &&
+                (apiTask.getTaskStatus().equals("completed") ||
+                        apiTask.getTaskStatus().equals("выполнено"))) {
+            return true;
+        }
+
+        // 3. Проверяем через метод isCompletedFromDB (если он есть в Task)
+        try {
+            // Проверяем наличие метода isCompletedFromDB
+            java.lang.reflect.Method method = apiTask.getClass().getMethod("isCompletedFromDB");
+            if ((boolean) method.invoke(apiTask)) {
+                return true;
+            }
+        } catch (Exception e) {
+            // Метод не существует, продолжаем проверку
+        }
+
+        // 4. Проверяем дату завершения
+        if (apiTask.getTaskCompletionDate() != null &&
+                !apiTask.getTaskCompletionDate().isEmpty()) {
+            return true;
+        }
+
+        return false;
     }
 
     private String formatTimeRangeFromDatabase(String goalDate, String notifyStart) {
@@ -469,7 +506,9 @@ public class CalendarActivity extends AppCompatActivity {
     }
 
     private String getIconNameForTaskType(String taskType) {
-        if (taskType == null) return "book";
+        if (taskType == null) {
+            return "book";
+        }
 
         taskType = taskType.toLowerCase();
 
@@ -491,6 +530,11 @@ public class CalendarActivity extends AppCompatActivity {
 
     private String getTaskStatusForCalendar(Task task) {
         try {
+            // Сначала проверяем, выполнена ли задача
+            if (isTaskCompleted(task)) {
+                return "выполнено";
+            }
+
             if (task.getTaskGoalDate() != null && !task.getTaskGoalDate().isEmpty()) {
                 SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                 Date goalDate = format.parse(task.getTaskGoalDate());
@@ -515,6 +559,8 @@ public class CalendarActivity extends AppCompatActivity {
             }
         } catch (ParseException e) {
             Log.e(TAG, "Error parsing date for status", e);
+        } catch (Exception e) {
+            Log.e(TAG, "Error determining task status", e);
         }
 
         return "назначена";
@@ -535,6 +581,9 @@ public class CalendarActivity extends AppCompatActivity {
             task_adapter = new CalendarTaskAdapter(day_tasks, this);
             rv_day_tasks.setAdapter(task_adapter);
         }
+
+        // Прокручиваем к началу списка
+        rv_day_tasks.scrollToPosition(0);
     }
 
     private void show_no_tasks_message() {
@@ -549,6 +598,8 @@ public class CalendarActivity extends AppCompatActivity {
 
         task_adapter = new CalendarTaskAdapter(messageList, this);
         rv_day_tasks.setAdapter(task_adapter);
+
+        Toast.makeText(this, "Нет задач на выбранный день", Toast.LENGTH_SHORT).show();
     }
 
     private void update_selected_date() {
@@ -574,7 +625,7 @@ public class CalendarActivity extends AppCompatActivity {
         }
     }
 
-    // Добавляем кнопки навигации по месяцам в layout
+    // Методы для навигации по месяцам
     public void goToPreviousMonth(View view) {
         currentCalendar.add(Calendar.MONTH, -1);
         selectedDay = 1; // Сбрасываем на первый день
@@ -606,98 +657,13 @@ public class CalendarActivity extends AppCompatActivity {
         }
     }
 
-    private Task convertTaskEntityToDisplayTask(TaskEntity entity) {
-        try {
-            Task displayTask = new Task();
-
-            // Основные поля
-            displayTask.setIdTask(entity.getLocalId());
-            displayTask.setTaskName(entity.getTaskName());
-            displayTask.setTaskType(entity.getTaskType());
-
-            // Форматируем время для отображения
-            String timeRange = formatTimeRangeFromDatabase(entity);
-            displayTask.set_time(timeRange);
-
-            // Иконка
-            String iconName = getIconNameForTaskType(entity.getTaskType());
-            displayTask.set_icon_name(iconName);
-
-            // Название
-            String title = entity.getTaskName();
-            if (title == null || title.isEmpty()) {
-                title = "Новая задача";
-            }
-            displayTask.set_title(title);
-
-            // Длительность
-            String duration = calculateDurationFromDatabase(entity);
-            displayTask.set_duration(duration);
-
-            // Статус
-            String status = getTaskStatusForCalendar(entity);
-            displayTask.set_status(status);
-
-            // Завершена ли
-            boolean isCompleted = "completed".equals(entity.getStatus());
-            displayTask.set_completed(isCompleted);
-
-            return displayTask;
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error converting TaskEntity: " + e.getMessage(), e);
-            return null;
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG, "CalendarActivity started");
+        // Также обновляем при старте активности
+        if (currentUserId != -1) {
+            load_tasks_for_selected_day();
         }
-    }
-
-    // Добавьте вспомогательные методы:
-    private String formatTimeRangeFromDatabase(TaskEntity entity) {
-        try {
-            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-            String startTime = entity.getNotifyStart() != null ? timeFormat.format(entity.getNotifyStart()) : "--:--";
-            String endTime = entity.getTaskGoalDate() != null ? timeFormat.format(entity.getTaskGoalDate()) : "--:--";
-            return startTime + " - " + endTime;
-        } catch (Exception e) {
-            return "--:-- - --:--";
-        }
-    }
-
-    private String calculateDurationFromDatabase(TaskEntity entity) {
-        if (entity.getNotifyStart() == null || entity.getTaskGoalDate() == null) {
-            return "";
-        }
-
-        long diffMillis = entity.getTaskGoalDate().getTime() - entity.getNotifyStart().getTime();
-        long diffMinutes = diffMillis / (1000 * 60);
-
-        if (diffMinutes < 60) {
-            return diffMinutes + " минут";
-        } else {
-            long hours = diffMinutes / 60;
-            long minutes = diffMinutes % 60;
-            if (minutes == 0) {
-                return hours + " час" + (hours > 1 ? "а" : "");
-            } else {
-                return hours + " час" + (hours > 1 ? "а" : "") + " " + minutes + " минут";
-            }
-        }
-    }
-
-    private String getTaskStatusForCalendar(TaskEntity entity) {
-        try {
-            if (entity.getTaskGoalDate() != null) {
-                Date now = new Date();
-
-                if (entity.getTaskGoalDate().before(now)) {
-                    return "просрочено";
-                } else {
-                    return "назначена";
-                }
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error checking task status", e);
-        }
-
-        return "назначена";
     }
 }

@@ -1,15 +1,20 @@
 package com.example.app;
 
 import android.content.Context;
+import android.graphics.Paint;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 public class CalendarTaskAdapter extends RecyclerView.Adapter<CalendarTaskAdapter.TaskViewHolder> {
+
+    private static final String TAG = "CalendarTaskAdapter";
 
     private List<Task> tasks;
     private Context context;
@@ -55,14 +60,38 @@ public class CalendarTaskAdapter extends RecyclerView.Adapter<CalendarTaskAdapte
         holder.tv_title.setText(task.get_title());
         holder.tv_status.setText(task.get_status());
 
-        // Устанавливаем цвет статуса
-        if ("просрочено".equals(task.get_status())) {
-            holder.tv_status.setTextColor(context.getResources().getColor(R.color.error_color));
-        } else if ("текущая".equals(task.get_status())) {
-            holder.tv_status.setTextColor(context.getResources().getColor(R.color.accent_color));
+        // Устанавливаем цвет плашки в зависимости от статуса
+        String status = task.get_status();
+        boolean isCompleted = task.is_completed();
+        int badgeBackground = R.drawable.badge_dark_bg; // По умолчанию
+
+        if ("выполнено".equals(status) || isCompleted) {
+            badgeBackground = R.drawable.badge_green_bg;
+            // Зачеркиваем текст для выполненных задач
+            holder.tv_title.setPaintFlags(holder.tv_title.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            // Делаем карточку полупрозрачной
+            holder.itemView.setAlpha(0.7f);
+        } else if ("просрочено".equals(status)) {
+            badgeBackground = R.drawable.badge_error_bg;
+            holder.tv_title.setPaintFlags(holder.tv_title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            holder.itemView.setAlpha(1.0f);
+        } else if ("текущая".equals(status)) {
+            badgeBackground = R.drawable.badge_dark_bg;
+            holder.tv_title.setPaintFlags(holder.tv_title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            holder.itemView.setAlpha(1.0f);
+        } else if ("в процессе".equals(status)) {
+            badgeBackground = R.drawable.badge_dark_bg;
+            holder.tv_title.setPaintFlags(holder.tv_title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            holder.itemView.setAlpha(1.0f);
         } else {
-            holder.tv_status.setTextColor(context.getResources().getColor(R.color.white_text));
+            badgeBackground = R.drawable.badge_dark_bg;
+            holder.tv_title.setPaintFlags(holder.tv_title.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+            holder.itemView.setAlpha(1.0f);
         }
+
+        holder.tv_status.setBackgroundResource(badgeBackground);
+        // Текст всегда белый
+        holder.tv_status.setTextColor(context.getResources().getColor(R.color.white_text));
 
         int background_index = position % 4;
         holder.itemView.setBackgroundResource(card_backgrounds[background_index]);

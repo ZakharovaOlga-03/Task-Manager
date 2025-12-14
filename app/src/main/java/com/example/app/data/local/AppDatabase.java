@@ -17,7 +17,7 @@ import com.example.app.data.local.entities.UserEntity;
                 TaskEntity.class,
                 UserEntity.class,
         },
-        version = 1,
+        version = 2,
         exportSchema = false
 )
 @TypeConverters({DateConverter.class})

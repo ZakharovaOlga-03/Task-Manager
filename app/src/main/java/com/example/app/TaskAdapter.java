@@ -12,6 +12,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.app.data.local.AppDatabase;
+import com.example.app.data.local.entities.TaskEntity;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -120,33 +124,61 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     }
 
     private void toggleTaskCompletion(Task task, int position) {
-        // Если задача уже выполнена, не делаем ничего (можно сделать отмену выполнения)
-        if (task.is_completed() || "выполнено".equals(task.get_status())) {
-            // Если нужно разрешить отмену выполнения, раскомментируйте:
-            // task.set_completed(false);
-            // task.set_status("в процессе");
-            // updateTaskStatusOnServer(task); // Исправлено на правильное имя метода
-            // notifyItemChanged(position);
-            return;
-        }
+        // Получаем новый статус
+        boolean newCompleted = !task.is_completed();
+        String newStatus = newCompleted ? "выполнено" : "в процессе";
+        int statusInt = newCompleted ? 1 : 0;
 
-        // Помечаем задачу как выполненную
-        task.set_completed(true);
-        task.set_status("выполнено");
+        // Обновляем объект Task для UI
+        task.set_completed(newCompleted);
+        task.set_status(newStatus);
 
-        // Обновляем UI
+        // Обновляем статус в локальной БД
+        updateTaskStatusInLocalDB(task.getIdTask(), statusInt);
+
+        // Отправляем на сервер (если нужно)
+        updateTaskStatusOnServer(task);
+
         notifyItemChanged(position);
 
-        // Отправляем на сервер - исправлено на правильное имя метода
-        updateTaskStatusOnServer(task); // Убрали лишние параметры
+        Toast.makeText(context,
+                newCompleted ? "Задача выполнена!" : "Задача в процессе!",
+                Toast.LENGTH_SHORT).show();
 
-        // Уведомляем пользователя
-        Toast.makeText(context, "Задача выполнена!", Toast.LENGTH_SHORT).show();
+        Log.d(TAG, "Task id and status: " + task.getIdTask() + " " + statusInt);
 
-        // Уведомляем слушателя
         if (statusChangedListener != null) {
             statusChangedListener.onTaskStatusChanged();
         }
+    }
+
+    private void updateTaskStatusInLocalDB(int localTaskId, int status) {
+        new Thread(() -> {
+            try {
+                // Получаем экземпляр базы данных
+                AppDatabase database = AppDatabase.getInstance(context);
+
+                // Находим задачу по localId
+                TaskEntity taskEntity = database.taskDao().getTaskByLocalId(localTaskId);
+
+                if (taskEntity != null) {
+                    // Обновляем статус
+                    taskEntity.setStatus(status);
+
+                    // Обновляем syncStatus для последующей синхронизации
+                    taskEntity.setSyncStatus("pending");
+
+                    // Сохраняем в БД
+                    database.taskDao().update(taskEntity);
+
+                    Log.d(TAG, "Task status updated in local DB: " + localTaskId + ", status: " + status);
+                } else {
+                    Log.e(TAG, "Task not found in local DB: " + localTaskId);
+                }
+            } catch (Exception e) {
+                Log.e(TAG, "Error updating task in local DB: " + e.getMessage(), e);
+            }
+        }).start();
     }
 
     private void updateTaskStatusOnServer(Task task) {
@@ -159,7 +191,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         int taskId = task.getId();
 
         Log.d("TaskAdapter", "Sending update request for task ID: " + taskId);
-        Log.d("TaskAdapter", "Status: completed, IsCompleted: true");
+        Log.d("TaskAdapter", "Status:" + task.get_status());
 
         Call<UpdateTaskResponse> call = apiService.updateTaskStatus(
                 taskId,

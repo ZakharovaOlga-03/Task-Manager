@@ -61,7 +61,7 @@ public class TaskEntity {
 
     // Статус задачи
     @ColumnInfo(name = "status")
-    private boolean status; // "pending", "in_progress", "completed", "cancelled"
+    private int status; // 0, 1
 
     @ColumnInfo(name = "completed_at")
     @TypeConverters(DateConverter.class)
@@ -87,7 +87,7 @@ public class TaskEntity {
     public TaskEntity() {
         this.taskCreationDate = new Date();
         this.syncStatus = "pending";
-        this.status = "pending";
+        this.status = 0;
         this.updatedAt = new Date();
     }
 
@@ -164,12 +164,12 @@ public class TaskEntity {
     public Date getTaskCreationDate() { return taskCreationDate; }
     public void setTaskCreationDate(Date taskCreationDate) { this.taskCreationDate = taskCreationDate; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) {
+    public int getStatus() { return status; }
+    public void setStatus(int status) {
         this.status = status;
         this.updatedAt = new Date();
 
-        if ("completed".equals(status)) {
+        if (status == 1) {
             this.completedAt = new Date();
         }
     }

@@ -101,25 +101,25 @@ public class TaskRepository {
     }
 
     // Пометить задачу выполненной
-    public void markTaskCompleted(int taskId, int reward, TaskCallback callback) {
-        executorService.execute(() -> {
-            try {
-                TaskEntity task = taskDao.getTaskByLocalId(taskId);
-                if (task != null) {
-                    task.setStatus("completed");
-                    task.setTaskReward(reward);
-                    task.setSyncStatus("pending");
-                    taskDao.updateTask(task);
-
-                    callback.onSuccess(task);
-                } else {
-                    callback.onError("Задача не найдена");
-                }
-            } catch (Exception e) {
-                callback.onError(e.getMessage());
-            }
-        });
-    }
+//    public void markTaskCompleted(int taskId, int reward, TaskCallback callback) {
+//        executorService.execute(() -> {
+//            try {
+//                TaskEntity task = taskDao.getTaskByLocalId(taskId);
+//                if (task != null) {
+//                    task.setStatus("completed");
+//                    task.setTaskReward(reward);
+//                    task.setSyncStatus("pending");
+//                    taskDao.updateTask(task);
+//
+//                    callback.onSuccess(task);
+//                } else {
+//                    callback.onError("Задача не найдена");
+//                }
+//            } catch (Exception e) {
+//                callback.onError(e.getMessage());
+//            }
+//        });
+//    }
 
     // Синхронизация с сервером
     private void syncTaskToServer(TaskEntity task) {

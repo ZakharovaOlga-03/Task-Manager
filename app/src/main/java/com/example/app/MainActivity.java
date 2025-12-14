@@ -424,110 +424,110 @@ public class MainActivity extends AppCompatActivity {
         return filteredTasks;
     }
 
-    private void setup_tasks_from_api(List<Task> apiTasks) {
-        task_list = new ArrayList<>();
-        Log.d(TAG, "Converting " + apiTasks.size() + " tasks from API to display format");
-
-        for (Task apiTask : apiTasks) {
-            Task displayTask = convertApiTaskToDisplayTask(apiTask);
-            if (displayTask != null) {
-                task_list.add(displayTask);
-            }
-        }
-
-        if (task_list.isEmpty()) {
-            show_no_tasks_message();
-        } else {
-            tv_no_tasks.setVisibility(View.GONE);
-            task_adapter = new TaskAdapter(task_list, this);
-
-            // Добавляем слушатель изменения статуса
-            task_adapter.setOnTaskStatusChangedListener(new TaskAdapter.OnTaskStatusChangedListener() {
-                @Override
-                public void onTaskStatusChanged() {
-                    // При изменении статуса задачи можно обновить статистику
-                    Log.d(TAG, "Task status changed");
-                    // Можно добавить обновление статистики или другие действия
-                }
-            });
-
-            rv_tasks.setAdapter(task_adapter);
-            rv_tasks.setVisibility(View.VISIBLE);
-        }
-    }
-
-
-    private Task convertApiTaskToDisplayTask(Task apiTask) {
-        try {
-            Log.d(TAG, "Converting task: ID=" + apiTask.getId() +
-                    ", Name=" + apiTask.getTaskName() +
-                    ", Status=" + apiTask.getTaskStatus() +
-                    ", IsCompleted=" + apiTask.is_completed());
-
-            Task displayTask = new Task();
-
-            // Копируем ID из API
-            displayTask.setIdTask(apiTask.getIdTask());
-            displayTask.setId(apiTask.getIdTask());
-
-            // 1. Время
-            String timeRange = formatTimeRangeFromDatabase(
-                    apiTask.getTaskGoalDate(),
-                    apiTask.getNotifyStart()
-            );
-            displayTask.set_time(timeRange);
-
-            // 2. Иконка
-            String iconName = getIconNameForTaskType(apiTask.getTaskType());
-            displayTask.set_icon_name(iconName);
-
-            // 3. Название задачи
-            String title = apiTask.getTaskName();
-            if (title == null || title.isEmpty()) {
-                title = "Новая задача";
-            }
-            displayTask.set_title(title);
-
-            // 4. Длительность
-            String duration = calculateDurationFromDatabase(
-                    apiTask.getTaskGoalDate(),
-                    apiTask.getNotifyStart()
-            );
-            displayTask.set_duration(duration);
-
-            // 5. Статус - проверяем, есть ли уже статус в API
-            String status;
-            if (apiTask.get_status() != null && !apiTask.get_status().isEmpty()) {
-                status = apiTask.get_status();
-            } else if (apiTask.getTaskStatus() != null && !apiTask.getTaskStatus().isEmpty()) {
-                status = apiTask.getTaskStatus();
-            } else {
-                status = getTaskStatus(apiTask); // вычисляем по дате
-            }
-            displayTask.set_status(status);
-
-            // 6. Завершена ли задача
-            boolean isCompleted = apiTask.isTaskCompleted();
-            displayTask.set_completed(isCompleted);
-
-            // Копируем другие поля из API
-            displayTask.setTaskName(apiTask.getTaskName());
-            displayTask.setTaskType(apiTask.getTaskType());
-            displayTask.setTaskGoalDate(apiTask.getTaskGoalDate());
-            displayTask.setNotifyStart(apiTask.getNotifyStart());
-            displayTask.setTaskStatus(apiTask.getTaskStatus());
-
-            Log.d(TAG, "Converted task: Title=" + displayTask.get_title() +
-                    ", Status=" + displayTask.get_status() +
-                    ", Completed=" + displayTask.is_completed());
-
-            return displayTask;
-
-        } catch (Exception e) {
-            Log.e(TAG, "Error converting task: " + e.getMessage(), e);
-            return null;
-        }
-    }
+//    private void setup_tasks_from_api(List<Task> apiTasks) {
+//        task_list = new ArrayList<>();
+//        Log.d(TAG, "Converting " + apiTasks.size() + " tasks from API to display format");
+//
+//        for (Task apiTask : apiTasks) {
+//            Task displayTask = convertApiTaskToDisplayTask(apiTask);
+//            if (displayTask != null) {
+//                task_list.add(displayTask);
+//            }
+//        }
+//
+//        if (task_list.isEmpty()) {
+//            show_no_tasks_message();
+//        } else {
+//            tv_no_tasks.setVisibility(View.GONE);
+//            task_adapter = new TaskAdapter(task_list, this);
+//
+//            // Добавляем слушатель изменения статуса
+//            task_adapter.setOnTaskStatusChangedListener(new TaskAdapter.OnTaskStatusChangedListener() {
+//                @Override
+//                public void onTaskStatusChanged() {
+//                    // При изменении статуса задачи можно обновить статистику
+//                    Log.d(TAG, "Task status changed");
+//                    // Можно добавить обновление статистики или другие действия
+//                }
+//            });
+//
+//            rv_tasks.setAdapter(task_adapter);
+//            rv_tasks.setVisibility(View.VISIBLE);
+//        }
+//    }
+//
+//
+//    private Task convertApiTaskToDisplayTask(Task apiTask) {
+//        try {
+//            Log.d(TAG, "Converting task: ID=" + apiTask.getId() +
+//                    ", Name=" + apiTask.getTaskName() +
+//                    ", Status=" + apiTask.getTaskStatus() +
+//                    ", IsCompleted=" + apiTask.is_completed());
+//
+//            Task displayTask = new Task();
+//
+//            // Копируем ID из API
+//            displayTask.setIdTask(apiTask.getIdTask());
+//            displayTask.setId(apiTask.getIdTask());
+//
+//            // 1. Время
+//            String timeRange = formatTimeRangeFromDatabase(
+//                    apiTask.getTaskGoalDate(),
+//                    apiTask.getNotifyStart()
+//            );
+//            displayTask.set_time(timeRange);
+//
+//            // 2. Иконка
+//            String iconName = getIconNameForTaskType(apiTask.getTaskType());
+//            displayTask.set_icon_name(iconName);
+//
+//            // 3. Название задачи
+//            String title = apiTask.getTaskName();
+//            if (title == null || title.isEmpty()) {
+//                title = "Новая задача";
+//            }
+//            displayTask.set_title(title);
+//
+//            // 4. Длительность
+//            String duration = calculateDurationFromDatabase(
+//                    apiTask.getTaskGoalDate(),
+//                    apiTask.getNotifyStart()
+//            );
+//            displayTask.set_duration(duration);
+//
+//            // 5. Статус - проверяем, есть ли уже статус в API
+//            int status;
+//            if (apiTask.get_status() != null && !apiTask.get_status().isEmpty()) {
+//                status = apiTask.get_status();
+//            } else if (!(apiTask.getTaskStatus()>1)) {
+//                status = apiTask.getTaskStatus();
+//            } else {
+//                status = getTaskStatus(apiTask); // вычисляем по дате
+//            }
+//            displayTask.set_status(status);
+//
+//            // 6. Завершена ли задача
+//            boolean isCompleted = apiTask.isTaskCompleted();
+//            displayTask.set_completed(isCompleted);
+//
+//            // Копируем другие поля из API
+//            displayTask.setTaskName(apiTask.getTaskName());
+//            displayTask.setTaskType(apiTask.getTaskType());
+//            displayTask.setTaskGoalDate(apiTask.getTaskGoalDate());
+//            displayTask.setNotifyStart(apiTask.getNotifyStart());
+//            displayTask.setTaskStatus(apiTask.getTaskStatus());
+//
+//            Log.d(TAG, "Converted task: Title=" + displayTask.get_title() +
+//                    ", Status=" + displayTask.get_status() +
+//                    ", Completed=" + displayTask.is_completed());
+//
+//            return displayTask;
+//
+//        } catch (Exception e) {
+//            Log.e(TAG, "Error converting task: " + e.getMessage(), e);
+//            return null;
+//        }
+//    }
 
     private void show_no_tasks_message() {
         task_list = new ArrayList<>();
@@ -638,28 +638,6 @@ public class MainActivity extends AppCompatActivity {
         return "в процессе";
     }
 
-    // Обновите метод isTaskCompleted для правильной проверки
-    private boolean isTaskCompleted(Task apiTask) {
-        // 1. Проверяем локальное поле
-        if (apiTask.isTaskCompleted()) {
-            return true;
-        }
-
-        // 2. Проверяем по данным из БД
-        if (apiTask.isCompletedFromDB()) {
-            return true;
-        }
-
-        // 3. Проверяем статус из отображения
-        if (apiTask.get_status() != null &&
-                (apiTask.get_status().equals("выполнено") ||
-                        apiTask.get_status().equals("completed"))) {
-            return true;
-        }
-
-        return false;
-    }
-
     public void navigateCalendarPrevious() {
         // Перейти к предыдущей неделе
         currentCalendar.add(Calendar.WEEK_OF_YEAR, -1);
@@ -672,12 +650,6 @@ public class MainActivity extends AppCompatActivity {
         currentCalendar.add(Calendar.WEEK_OF_YEAR, 1);
         setup_calendar();
         load_tasks_for_selected_day();
-    }
-
-    public void openAddTaskActivity() {
-        Log.d(TAG, "Opening AddTaskActivity");
-        Intent intent = new Intent(MainActivity.this, AddTaskActivity.class);
-        startActivityForResult(intent, 100);
     }
 
     @Override
@@ -770,36 +742,36 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data, caller);
     }
 
-    private List<Task> convertTaskEntitiesToTasks(List<TaskEntity> taskEntities) {
-        List<Task> tasks = new ArrayList<>();
-
-        for (TaskEntity entity : taskEntities) {
-            Task task = new Task();
-
-            // Заполняем поля для отображения
-            task.setIdTask(entity.getLocalId()); // Используем локальный ID
-            task.setUserId(entity.getUserId());
-            task.setTaskName(entity.getTaskName());
-            task.setTaskType(entity.getTaskType());
-            task.setTaskGoalDate(dateToString(entity.getTaskGoalDate()));
-            task.setNotifyStart(dateToString(entity.getNotifyStart()));
-            task.setTaskNote(entity.getTaskNote());
-            task.setTaskReward(entity.getTaskReward());
-            task.setTaskStatus(entity.getStatus());
-
-            // Для отображения в UI
-            task.set_time(formatTimeRange(entity.getNotifyStart(), entity.getTaskGoalDate()));
-            task.set_title(entity.getTaskName());
-            task.set_status(entity.getStatus());
-            task.set_completed("completed".equals(entity.getStatus()));
-            task.set_icon_name(getIconNameForTaskType(entity.getTaskType()));
-            task.set_duration(calculateDuration(entity.getNotifyStart(), entity.getTaskGoalDate()));
-
-            tasks.add(task);
-        }
-
-        return tasks;
-    }
+//    private List<Task> convertTaskEntitiesToTasks(List<TaskEntity> taskEntities) {
+//        List<Task> tasks = new ArrayList<>();
+//
+//        for (TaskEntity entity : taskEntities) {
+//            Task task = new Task();
+//
+//            // Заполняем поля для отображения
+//            task.setIdTask(entity.getLocalId()); // Используем локальный ID
+//            task.setUserId(entity.getUserId());
+//            task.setTaskName(entity.getTaskName());
+//            task.setTaskType(entity.getTaskType());
+//            task.setTaskGoalDate(dateToString(entity.getTaskGoalDate()));
+//            task.setNotifyStart(dateToString(entity.getNotifyStart()));
+//            task.setTaskNote(entity.getTaskNote());
+//            task.setTaskReward(entity.getTaskReward());
+//            task.setTaskStatus(entity.getStatus());
+//
+//            // Для отображения в UI
+//            task.set_time(formatTimeRange(entity.getNotifyStart(), entity.getTaskGoalDate()));
+//            task.set_title(entity.getTaskName());
+//            task.set_status(entity.getStatus());
+//            task.set_completed("completed".equals(entity.getStatus()));
+//            task.set_icon_name(getIconNameForTaskType(entity.getTaskType()));
+//            task.set_duration(calculateDuration(entity.getNotifyStart(), entity.getTaskGoalDate()));
+//
+//            tasks.add(task);
+//        }
+//
+//        return tasks;
+//    }
 
     private void load_tasks_for_selected_day() {
         int userId = SharedPrefs.getUserId(this);
@@ -855,42 +827,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String dateToString(Date date) {
-        if (date == null) return "";
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        return format.format(date);
-    }
-
-    private String formatTimeRange(Date start, Date end) {
-        try {
-            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
-            String startTime = start != null ? timeFormat.format(start) : "--:--";
-            String endTime = end != null ? timeFormat.format(end) : "--:--";
-            return startTime + " - " + endTime;
-        } catch (Exception e) {
-            return "--:-- - --:--";
-        }
-    }
-
-    private String calculateDuration(Date start, Date end) {
-        if (start == null || end == null) return "";
-
-        long diffMillis = end.getTime() - start.getTime();
-        long diffMinutes = diffMillis / (1000 * 60);
-
-        if (diffMinutes < 60) {
-            return diffMinutes + " минут";
-        } else {
-            long hours = diffMinutes / 60;
-            long minutes = diffMinutes % 60;
-            if (minutes == 0) {
-                return hours + " час" + (hours > 1 ? "а" : "");
-            } else {
-                return hours + " час" + (hours > 1 ? "а" : "") + " " + minutes + " минут";
-            }
-        }
-    }
-
     private Task convertTaskEntityToDisplayTask(TaskEntity entity) {
         try {
             Task task = new Task();
@@ -917,8 +853,8 @@ public class MainActivity extends AppCompatActivity {
             // Поля для отображения в UI
             task.set_time(formatTimeRangeForDisplay(entity.getNotifyStart(), entity.getTaskGoalDate()));
             task.set_title(entity.getTaskName() != null ? entity.getTaskName() : "Новая задача");
-            task.set_status(entity.getStatus() != null ? entity.getStatus() : "pending");
-            task.set_completed("completed".equals(entity.getStatus()));
+            task.set_status(entity.getStatus()==1 ? "выполнено" : "в процессе");
+            task.set_completed(entity.getStatus()==1);
             task.set_icon_name(getIconNameForTaskType(entity.getTaskType()));
             task.set_duration(calculateDurationForDisplay(entity.getNotifyStart(), entity.getTaskGoalDate()));
 

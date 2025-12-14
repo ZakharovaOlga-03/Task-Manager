@@ -314,46 +314,6 @@ public class TaskSyncManager {
         return newTasks;
     }
 
-    // Создать файл с тестовыми задачами (для демонстрации)
-    public void createSampleTasksFile() {
-        List<Task> sampleTasks = new ArrayList<>();
-
-        // Создаем несколько тестовых задач
-        Task task1 = new Task();
-        task1.setTaskName("Прочитать книгу");
-        task1.setTaskType("book");
-        task1.setTaskImportance("3");
-        task1.setTaskGoalDate("2024-12-10 18:00:00");
-        task1.setNotifyStart("2024-12-10 17:00:00");
-        task1.setTaskNote("Первая глава");
-        task1.setTaskReward(10);
-        sampleTasks.add(task1);
-
-        Task task2 = new Task();
-        task2.setTaskName("Встреча с командой");
-        task2.setTaskType("meeting");
-        task2.setTaskImportance("4");
-        task2.setTaskGoalDate("2024-12-10 14:00:00");
-        task2.setNotifyStart("2024-12-10 13:45:00");
-        task2.setTaskNote("Обсуждение проекта");
-        task2.setTaskReward(15);
-        sampleTasks.add(task2);
-
-        Task task3 = new Task();
-        task3.setTaskName("Отдохнуть");
-        task3.setTaskType("coffee");
-        task3.setTaskImportance("2");
-        task3.setTaskGoalDate("2024-12-10 15:30:00");
-        task3.setNotifyStart("2024-12-10 15:00:00");
-        task3.setTaskNote("Кофе-брейк");
-        task3.setTaskReward(5);
-        sampleTasks.add(task3);
-
-        // Сохраняем в файл
-        saveTasksToFile(sampleTasks);
-        Log.d(TAG, "Created sample tasks file with " + sampleTasks.size() + " tasks");
-    }
-
     // Проверить наличие задач в файле
     public boolean hasTasksInFile() {
         File tasksFile = FileUtils.getTasksFile(context);

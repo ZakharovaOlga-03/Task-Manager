@@ -70,13 +70,13 @@ public interface TaskDao {
     List<TaskEntity> getGuestTasks();
 
     // Статистика
-    @Query("SELECT COUNT(*) FROM tasks WHERE user_id = :userId AND status = 'completed'")
+    @Query("SELECT COUNT(*) FROM tasks WHERE user_id = :userId AND status = 1")
     LiveData<Integer> getCompletedTaskCount(int userId);
 
-    @Query("SELECT COUNT(*) FROM tasks WHERE user_id = :userId AND status = 'pending'")
+    @Query("SELECT COUNT(*) FROM tasks WHERE user_id = :userId AND status = 0")
     LiveData<Integer> getPendingTaskCount(int userId);
 
-    @Query("SELECT SUM(task_reward) FROM tasks WHERE user_id = :userId AND status = 'completed'")
+    @Query("SELECT SUM(task_reward) FROM tasks WHERE user_id = :userId AND status = 1")
     LiveData<Integer> getTotalCoinsEarned(int userId);
 
     // Поиск
@@ -95,4 +95,7 @@ public interface TaskDao {
 
     @Query("SELECT * FROM tasks WHERE user_id = :userId AND date(task_goal_date) = date(:date) AND is_deleted = 0")
     List<TaskEntity> getTasksForDateSync(int userId, Date date);
+
+    @Update
+    void update(TaskEntity task);
 }

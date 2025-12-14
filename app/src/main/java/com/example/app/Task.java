@@ -53,7 +53,7 @@ public class Task {
     private String taskCreationDate;
 
     @SerializedName("task_status")
-    private String taskStatus;
+    private int taskStatus; //0, 1
 
     @SerializedName("completed_date")
     private String taskCompletionDate;
@@ -111,7 +111,7 @@ public class Task {
     public String getTaskNote() { return taskNote; }
     public int getTaskReward() { return taskReward; }
     public String getTaskCreationDate() { return taskCreationDate; }
-    public String getTaskStatus() { return taskStatus; }
+    public int getTaskStatus() { return taskStatus; }
     public String getTaskCompletionDate() { return taskCompletionDate; }
 
     // ========== СЕТТЕРЫ ДЛЯ API ==========
@@ -131,7 +131,7 @@ public class Task {
     public void setTaskNote(String taskNote) { this.taskNote = taskNote; }
     public void setTaskReward(int taskReward) { this.taskReward = taskReward; }
     public void setTaskCreationDate(String taskCreationDate) { this.taskCreationDate = taskCreationDate; }
-    public void setTaskStatus(String taskStatus) { this.taskStatus = taskStatus; }
+    public void setTaskStatus(int taskStatus) { this.taskStatus = taskStatus; }
     public void setTaskCompletionDate(String taskCompletionDate) { this.taskCompletionDate = taskCompletionDate; }
 
     // ========== ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ==========
@@ -182,8 +182,7 @@ public class Task {
     // Метод для определения, выполнена ли задача по данным из БД
     public boolean isCompletedFromDB() {
         // Проверяем поле task_status
-        if (taskStatus != null &&
-                (taskStatus.equals("completed") || taskStatus.equals("выполнено"))) {
+        if (taskStatus == 1) {
             return true;
         }
 

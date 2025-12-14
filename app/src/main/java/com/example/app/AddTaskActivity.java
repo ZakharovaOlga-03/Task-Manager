@@ -37,7 +37,7 @@ public class AddTaskActivity extends AppCompatActivity {
 
     // UI элементы
     private EditText et_task_name, et_date, et_start_time, et_end_time, et_task_note;
-    private Spinner spinner_category, spinner_reminder, spinner_status, spinner_priority;
+    private Spinner spinner_category, spinner_reminder, spinner_priority;
     private Button btn_create_task;
 
     private Calendar calendar;
@@ -204,12 +204,6 @@ public class AddTaskActivity extends AppCompatActivity {
         reminder_adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinner_reminder.setAdapter(reminder_adapter);
 
-//        // Статусы задач (новый спиннер)
-//        ArrayAdapter<String> status_adapter = new ArrayAdapter<>(this,
-//                R.layout.spinner_item, STATUSES);
-//        status_adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
-//        spinner_status.setAdapter(status_adapter);
-
         // Приоритеты (новый спиннер)
         ArrayAdapter<String> priority_adapter = new ArrayAdapter<>(this,
                 R.layout.spinner_item, PRIORITIES);
@@ -266,7 +260,6 @@ public class AddTaskActivity extends AppCompatActivity {
         String endTime = et_end_time.getText().toString().trim();
         String category = spinner_category.getSelectedItem().toString();
         String reminder = spinner_reminder.getSelectedItem().toString();
-
         String priority = spinner_priority.getSelectedItem().toString();
         String taskNote = et_task_note.getText().toString().trim();
 
@@ -304,7 +297,7 @@ public class AddTaskActivity extends AppCompatActivity {
             TaskEntity newTask = createTaskEntity(
                     taskName, taskType, taskImportance, taskGoalDate,
                     notifyStart, notifyFrequency, notifyType, taskNote,
-                    taskReward, "pending"
+                    taskReward, 0
             );
 
             // Показать прогресс
@@ -329,7 +322,7 @@ public class AddTaskActivity extends AppCompatActivity {
     private TaskEntity createTaskEntity(
             String taskName, String taskType, String taskImportance,
             Date taskGoalDate, Date notifyStart, String notifyFrequency,
-            String notifyType, String taskNote, int taskReward, String status) {
+            String notifyType, String taskNote, int taskReward, int status) {
 
         TaskEntity task = new TaskEntity();
 
@@ -344,7 +337,7 @@ public class AddTaskActivity extends AppCompatActivity {
         task.setNotifyType(notifyType);
         task.setTaskNote(taskNote);
         task.setTaskReward(taskReward);
-        task.setStatus(status);
+        task.setStatus(0);
 
         // Дополнительные поля из TaskEntity
         task.setTaskCreationDate(new Date());
@@ -359,12 +352,6 @@ public class AddTaskActivity extends AppCompatActivity {
                 task.setSyncStatus("offline"); // Только локальное сохранение
             }
         }
-
-        // Установить completedAt если задача создается выполненной
-        if ("completed".equals(status)) {
-            task.setCompletedAt(new Date());
-        }
-
         return task;
     }
 

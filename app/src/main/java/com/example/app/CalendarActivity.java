@@ -463,9 +463,7 @@ public class CalendarActivity extends AppCompatActivity {
         }
 
         // 2. Проверяем статус из БД
-        if (apiTask.getTaskStatus() != null &&
-                (apiTask.getTaskStatus().equals("completed") ||
-                        apiTask.getTaskStatus().equals("выполнено"))) {
+        if (apiTask.getTaskStatus() == 1) {
             return true;
         }
 

@@ -6,92 +6,103 @@
     android:background="@color/primary_dark"
     android:fitsSystemWindows="false">
 
-  <androidx.constraintlayout.widget.ConstraintLayout
-      android:layout_width="match_parent"
-      android:layout_height="match_parent">
-
-    <LinearLayout
-        android:id="@+id/header_layout"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="@dimen/padding_24"
-        android:paddingHorizontal="@dimen/padding_16"
-        android:background="@color/primary_dark"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="match_parent">
 
-      <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:orientation="horizontal"
-          android:gravity="center_vertical"
-          android:paddingBottom="@dimen/padding_16">
-
-        <ImageView
-            android:id="@+id/menu_btn"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_menu"
-            android:contentDescription="Menu"
-            android:scaleType="fitXY"
-            app:tint="#FFFFFF" />
-
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <!-- Кнопки навигации по месяцам -->
-        <ImageView
-            android:id="@+id/btn_prev_month"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_chevron_left"
-            android:contentDescription="Предыдущий месяц"
-            android:scaleType="fitXY"
-            app:tint="#FFFFFF"
-            android:onClick="goToPreviousMonth"
-            android:layout_marginEnd="8dp" />
-
-        <TextView
-            android:id="@+id/tv_month_year"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/header_layout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Апрель 2025"
-            android:textSize="@dimen/text_size_20"
-            android:textColor="@color/white_text"
-            android:textStyle="bold"
-            android:paddingHorizontal="@dimen/padding_8" />
+            android:orientation="vertical"
+            android:paddingTop="@dimen/padding_24"
+            android:paddingHorizontal="@dimen/padding_16"
+            android:background="@color/primary_dark"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/btn_next_month"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_chevron_right"
-            android:contentDescription="Следующий месяц"
-            android:scaleType="fitXY"
-            app:tint="#FFFFFF"
-            android:onClick="goToNextMonth"
-            android:layout_marginStart="8dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingBottom="@dimen/padding_16">
 
-        <View
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
+                <ImageView
+                    android:id="@+id/menu_btn"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_menu"
+                    android:contentDescription="Menu"
+                    android:scaleType="fitXY"
+                    app:tint="#FFFFFF" />
 
-        <ImageView
-            android:id="@+id/search_btn"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_search"
-            android:contentDescription="Search"
-            android:scaleType="fitXY"
-            app:tint="#FFFFFF" />
+                <!-- ДОБАВЛЕННАЯ КНОПКА УВЕДОМЛЕНИЙ -->
+                <ImageView
+                    android:id="@+id/btn_notification"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@android:drawable/ic_dialog_info"
+                    android:contentDescription="Уведомления"
+                    android:scaleType="fitXY"
+                    app:tint="#FFFFFF"
+                    android:onClick="onTestNotificationClick"
+                    android:layout_marginStart="8dp" />
 
-      </LinearLayout>
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
 
-    </LinearLayout>
+                <!-- Кнопки навигации по месяцам -->
+                <ImageView
+                    android:id="@+id/btn_prev_month"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_chevron_left"
+                    android:contentDescription="Предыдущий месяц"
+                    android:scaleType="fitXY"
+                    app:tint="#FFFFFF"
+                    android:onClick="goToPreviousMonth"
+                    android:layout_marginEnd="8dp" />
 
+                <TextView
+                    android:id="@+id/tv_month_year"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Апрель 2025"
+                    android:textSize="@dimen/text_size_20"
+                    android:textColor="@color/white_text"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="@dimen/padding_8" />
+
+                <ImageView
+                    android:id="@+id/btn_next_month"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_chevron_right"
+                    android:contentDescription="Следующий месяц"
+                    android:scaleType="fitXY"
+                    app:tint="#FFFFFF"
+                    android:onClick="goToNextMonth"
+                    android:layout_marginStart="8dp" />
+
+                <View
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_weight="1" />
+
+                <ImageView
+                    android:id="@+id/search_btn"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:src="@drawable/ic_search"
+                    android:contentDescription="Search"
+                    android:scaleType="fitXY"
+                    app:tint="#FFFFFF" />
+
+            </LinearLayout>
+
+        </LinearLayout>
     <LinearLayout
         android:id="@+id/calendar_container"
         android:layout_width="match_parent"

@@ -1,5 +1,11 @@
 package com.example.app;
-
+import androidx.core.content.ContextCompat;
+import com.example.app.utils.NotificationHelper;
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import androidx.core.app.ActivityCompat;
+import android.widget.Toast;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -31,6 +37,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class CalendarActivity extends AppCompatActivity {
+    private NotificationHelper notificationHelper;
+    private static final int NOTIFICATION_PERMISSION_CODE = 101;
 
     private static final String TAG = "CalendarActivity";
 
@@ -53,6 +61,42 @@ public class CalendarActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Инициализация помощника уведомлений
+        notificationHelper = new NotificationHelper(this);
+
+        // Запрос разрешений (для Android 13+)
+        requestNotificationPermission();
+
+
+        // Проверка авторизации
+        if (!SharedPrefs.isLoggedIn(this)) {
+            Toast.makeText(this, "Пожалуйста, войдите в систему", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        setContentView(R.layout.activity_calendar);
+        // 4. Проверка и показ тестового уведомления
+        new android.os.Handler().postDelayed(() -> {
+            if (notificationHelper.areNotificationsEnabled()) {
+                // Есть разрешение - показываем уведомление
+                notificationHelper.showTestNotification();
+                Toast.makeText(this, "Уведомление отправлено!", Toast.LENGTH_SHORT).show();
+            } else {
+                // Нет разрешения - просим его
+                Toast.makeText(this,
+                        "Для уведомлений нужно разрешение. Нажмите на иконку 🔔 вверху.",
+                        Toast.LENGTH_LONG).show();
+            }
+        }, 3000);
+
+
+        // Показать тестовое уведомление через 3 секунды
+        new android.os.Handler().postDelayed(() -> {
+            if (notificationHelper.areNotificationsEnabled()) {
+                notificationHelper.showTestNotification();
+            }
+        }, 3000);
 
         // Проверка авторизации
         if (!SharedPrefs.isLoggedIn(this)) {
@@ -664,6 +708,24 @@ public class CalendarActivity extends AppCompatActivity {
         // Также обновляем при старте активности
         if (currentUserId != -1) {
             load_tasks_for_selected_day();
+        }
+    }
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // Проверяем, есть ли уже разрешение
+            if (ContextCompat.checkSelfPermission(this,
+                    Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) {
+                // Разрешение уже есть
+                Toast.makeText(this, "Уведомления включены", Toast.LENGTH_SHORT).show();
+            } else {
+                // Запрашиваем разрешение
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+                        NOTIFICATION_PERMISSION_CODE);
+            }
+        } else {
+            // Для Android ниже 13 разрешение не требуется
+            Toast.makeText(this, "Уведомления готовы к работе", Toast.LENGTH_SHORT).show();
         }
     }
 }

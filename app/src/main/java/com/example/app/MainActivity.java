@@ -9,13 +9,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import com.example.app.ApiService;
+import com.example.app.RetrofitClient;
+import com.example.app.TasksResponse;
+import com.example.app.SharedPrefs;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
@@ -23,12 +24,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.app.ApiService;
-import com.example.app.RetrofitClient;
-import com.example.app.TasksResponse;
-import com.example.app.SharedPrefs;
 import com.example.app.data.local.AppDatabase;
-import com.example.app.data.local.dao.TaskDao;
 import com.example.app.data.local.entities.TaskEntity;
 import com.example.app.utils.NetworkUtils;
 
@@ -39,9 +35,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+
 
 public class MainActivity extends AppCompatActivity {
 

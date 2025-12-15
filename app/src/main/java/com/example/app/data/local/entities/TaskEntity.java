@@ -67,7 +67,11 @@ public class TaskEntity {
 
     // Статус задачи
     @ColumnInfo(name = "status")
+
+    private String status; // "pending", "in_progress", "completed", "cancelled"private boolean status; // "pending", "in_progress", "completed", "cancelled"
+
     private int status; // 0, 1
+
 
     @ColumnInfo(name = "completed_at")
     @TypeConverters(DateConverter.class)

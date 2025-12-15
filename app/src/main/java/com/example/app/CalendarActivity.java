@@ -1,17 +1,7 @@
 package com.example.app;
-import androidx.core.content.ContextCompat;
-import com.example.app.utils.NotificationHelper;
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Build;
-import androidx.core.app.ActivityCompat;
-import android.widget.Toast;
 
-import com.example.app.data.local.AppDatabase;
-import com.example.app.data.local.entities.TaskEntity;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.Observer;
 import android.os.Build;
+import android.widget.Toast;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -19,7 +9,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;

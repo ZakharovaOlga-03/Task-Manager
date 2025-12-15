@@ -6,8 +6,14 @@ import androidx.room.ColumnInfo;
 import androidx.room.TypeConverters;
 import androidx.annotation.NonNull;
 
+import com.example.app.Task;
 import com.example.app.data.local.converters.DateConverter;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Locale;
 
 @Entity(tableName = "tasks")
 public class TaskEntity {
